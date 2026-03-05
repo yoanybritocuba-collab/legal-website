@@ -1,56 +1,44 @@
-import type { Metadata, Viewport } from 'next'
-import { Playfair_Display, Inter } from 'next/font/google'
-import './globals.css'
-
-const playfair = Playfair_Display({
-  subsets: ['latin'],
-  variable: '--font-playfair',
-  display: 'swap',
-})
+import type { Metadata } from "next";
+import { Inter, Playfair_Display } from "next/font/google";
+import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap',
-})
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+});
 
 export const metadata: Metadata = {
-  title: 'Abogada | Servicios Legales Profesionales',
-  description: 'Bufete de abogados con experiencia en derecho civil, penal, familiar y mercantil. Agenda tu consulta hoy y recibe asesoramiento legal de calidad.',
-  keywords: ['abogada', 'servicios legales', 'consulta legal', 'derecho civil', 'derecho penal', 'derecho familiar'],
+  title: "Loida Azules - Abogada",
+  description: "Servicios legales profesionales con más de 15 años de experiencia. Derecho Civil, Penal, Familiar, Mercantil y Laboral.",
   icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
+    icon: '/favicon.png',
     apple: '/apple-icon.png',
   },
-}
-
-export const viewport: Viewport = {
-  themeColor: '#1a1a3e',
-}
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${playfair.variable} ${inter.variable}`}>
-      <body className="antialiased">
-        {children}
+    <html lang="es" suppressHydrationWarning>
+      <body className={`${inter.variable} ${playfair.variable} antialiased`}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }

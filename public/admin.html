@@ -143,8 +143,8 @@
         <div class="login-box">
             <h1>Panel Loida Azules</h1>
             <div id="errorMessage" class="error"></div>
-            <input type="email" id="email" placeholder="Email">
-            <input type="password" id="password" placeholder="Contraseña">
+            <input type="email" id="email" placeholder="Email" value="" autocomplete="off">
+            <input type="password" id="password" placeholder="Contraseña" value="" autocomplete="off">
             <button onclick="login()">Iniciar Sesión</button>
         </div>
     </div>
@@ -198,22 +198,34 @@
             } else {
                 loginContainer.style.display = 'flex';
                 panelContainer.style.display = 'none';
-                // Limpiar campos al cerrar sesión
                 document.getElementById('email').value = '';
                 document.getElementById('password').value = '';
             }
         });
 
         window.login = function() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
             
             errorMessage.style.display = 'none';
             
+            if (!email || !password) {
+                errorMessage.textContent = 'Por favor ingresa email y contraseña';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
             auth.signInWithEmailAndPassword(email, password)
                 .catch((error) => {
-                    errorMessage.textContent = 'Email o contraseña incorrectos';
+                    let mensaje = 'Email o contraseña incorrectos';
+                    if (error.code === 'auth/network-request-failed') {
+                        mensaje = 'Error de conexión. Verifica tu internet.';
+                    } else if (error.code === 'auth/too-many-requests') {
+                        mensaje = 'Demasiados intentos. Espera unos minutos.';
+                    }
+                    errorMessage.textContent = mensaje;
                     errorMessage.style.display = 'block';
+                    console.error(error);
                 });
         };
 
@@ -250,7 +262,7 @@
             }
         };
 
-        // IMPORTANTE: Cerrar sesión cuando se cierra la pestaña
+        // Cerrar sesión al cerrar pestaña
         window.addEventListener('beforeunload', function() {
             auth.signOut();
         });

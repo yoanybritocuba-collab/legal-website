@@ -24,7 +24,7 @@ export function Footer() {
             </p>
           </div>
 
-          {/* Columna 2: Contacto */}
+          {/* Columna 2: Contacto - TODOS EJECUTABLES */}
           <div>
             <h3 className="font-[family-name:var(--font-playfair)] text-lg font-bold text-gold mb-4">
               Contacto
@@ -32,7 +32,14 @@ export function Footer() {
             <ul className="space-y-3 font-[family-name:var(--font-inter)] text-sm text-gray-300">
               <li className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 text-gold shrink-0 mt-0.5" />
-                <span>C/ Bailén 92 Entlo. 3a esc. izqda<br />08009 Barcelona</span>
+                <a 
+                  href="https://maps.google.com/?q=C/Bailén 92 Entlo. 3a esc. izqda, 08009 Barcelona"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-gold transition-colors"
+                >
+                  C/ Bailén 92 Entlo. 3a esc. izqda<br />08009 Barcelona
+                </a>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="h-5 w-5 text-gold shrink-0" />
@@ -49,7 +56,7 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Columna 3: Horario */}
+          {/* Columna 3: Horario - SOLO LUNES A VIERNES */}
           <div>
             <h3 className="font-[family-name:var(--font-playfair)] text-lg font-bold text-gold mb-4">
               Horario
@@ -60,13 +67,6 @@ export function Footer() {
                 <div>
                   <p>Lunes a Viernes: 9:00 - 14:00</p>
                   <p className="mt-1">16:00 - 19:00</p>
-                </div>
-              </li>
-              <li className="flex items-start gap-3">
-                <Clock className="h-5 w-5 text-gold shrink-0 mt-0.5" />
-                <div>
-                  <p>Sábados: 9:00 - 13:00</p>
-                  <p className="text-xs text-gray-400 mt-1">Previa cita</p>
                 </div>
               </li>
             </ul>
@@ -100,7 +100,7 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Mapa (opcional - si quieres añadirlo después) */}
+        {/* Mapa */}
         <div className="mt-12">
           <div className="h-64 w-full bg-gray-800 rounded-lg overflow-hidden">
             <iframe
@@ -118,9 +118,9 @@ export function Footer() {
         {/* Copyright y colegiatura */}
         <div className="mt-12 pt-8 border-t border-white/10 text-center font-[family-name:var(--font-inter)] text-sm text-gray-400">
           <p>© {new Date().getFullYear()} Loida Azules Suárez. Todos los derechos reservados.</p>
-          <p className="mt-2 text-xs">Ilustre Colegio de la Abogacía de Barcelona - ICAB · Nº Colegiada: 12345</p>
+          <p className="mt-2 text-xs">Ilustre Colegio de la Abogacía de Barcelona - ICAB</p>
           <p className="mt-1 text-xs text-gray-500">
-            C/ Bailén 92 Entlo. 3a esc. izqda · 08009 Barcelona · Tel. +34 604 173 477
+            C/ Bailén 92 Entlo. 3a esc. izqda · 08009 Barcelona · Tel. <a href="tel:+34604173477" className="hover:text-gold">+34 604 173 477</a>
           </p>
         </div>
       </div>

@@ -37,10 +37,10 @@ export default function Navbar() {
             <Scale className="h-8 w-8 text-gold" />
             <div className="flex flex-col">
               <span className="font-[family-name:var(--font-playfair)] text-lg font-bold tracking-wide text-primary-foreground">
-                ABOGADA
+                LOIDA AZULES
               </span>
               <span className="font-[family-name:var(--font-inter)] text-[10px] uppercase tracking-[0.3em] text-gold">
-                Servicios Legales
+                Abogada
               </span>
             </div>
           </a>

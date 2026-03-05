@@ -1,185 +1,127 @@
 import { Scale, MapPin, Phone, Mail, Clock } from "lucide-react"
+import Link from "next/link"
 
 export function Footer() {
   return (
-    <footer id="contacto" className="bg-navy">
-      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
-        <div className="grid gap-12 lg:grid-cols-4">
-          {/* Brand */}
-          <div className="lg:col-span-1">
+    <footer className="bg-navy text-white">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-4">
+          {/* Columna 1: Logo y descripción */}
+          <div>
             <div className="flex items-center gap-3">
               <Scale className="h-8 w-8 text-gold" />
               <div className="flex flex-col">
-                <span className="font-[family-name:var(--font-playfair)] text-lg font-bold tracking-wide text-primary-foreground">
-                  ABOGADA
+                <span className="font-[family-name:var(--font-playfair)] text-lg font-bold">
+                  LOIDA AZULES
                 </span>
                 <span className="font-[family-name:var(--font-inter)] text-[10px] uppercase tracking-[0.3em] text-gold">
-                  Servicios Legales
+                  Abogada
                 </span>
               </div>
             </div>
-            <p className="mt-6 font-[family-name:var(--font-inter)] text-sm leading-relaxed text-primary-foreground/60">
-              Comprometidos con la excelencia juridica y la defensa de tus derechos. Tu confianza es nuestra mayor responsabilidad.
+            <p className="mt-4 font-[family-name:var(--font-inter)] text-sm text-gray-300">
+              Justicia y excelencia legal a tu servicio. Más de 15 años defendiendo tus derechos con dedicación y profesionalismo.
             </p>
           </div>
 
-          {/* Quick Links */}
+          {/* Columna 2: Contacto */}
           <div>
-            <h4 className="font-[family-name:var(--font-playfair)] text-base font-bold text-primary-foreground">
-              Enlaces Rapidos
-            </h4>
-            <ul className="mt-4 space-y-3">
-              {[
-                { label: "Inicio", href: "#inicio" },
-                { label: "Servicios", href: "#servicios" },
-                { label: "Sobre Mi", href: "#sobre-mi" },
-                { label: "Testimonios", href: "#testimonios" },
-                { label: "Agendar Cita", href: "#agendar" },
-              ].map((link) => (
-                <li key={link.href}>
+            <h3 className="font-[family-name:var(--font-playfair)] text-lg font-bold text-gold mb-4">
+              Contacto
+            </h3>
+            <ul className="space-y-3 font-[family-name:var(--font-inter)] text-sm text-gray-300">
+              <li className="flex items-start gap-3">
+                <MapPin className="h-5 w-5 text-gold shrink-0 mt-0.5" />
+                <span>C/ Bailén 92 Entlo. 3a esc. izqda<br />08009 Barcelona</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <Phone className="h-5 w-5 text-gold shrink-0" />
+                <a href="tel:+34604173477" className="hover:text-gold transition-colors">
+                  +34 604 173 477
+                </a>
+              </li>
+              <li className="flex items-center gap-3">
+                <Mail className="h-5 w-5 text-gold shrink-0" />
+                <a href="mailto:loyanzules@icab.cat" className="hover:text-gold transition-colors break-all">
+                  loyanzules@icab.cat
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Columna 3: Horario */}
+          <div>
+            <h3 className="font-[family-name:var(--font-playfair)] text-lg font-bold text-gold mb-4">
+              Horario
+            </h3>
+            <ul className="space-y-3 font-[family-name:var(--font-inter)] text-sm text-gray-300">
+              <li className="flex items-start gap-3">
+                <Clock className="h-5 w-5 text-gold shrink-0 mt-0.5" />
+                <div>
+                  <p>Lunes a Viernes: 9:00 - 14:00</p>
+                  <p className="mt-1">16:00 - 19:00</p>
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <Clock className="h-5 w-5 text-gold shrink-0 mt-0.5" />
+                <div>
+                  <p>Sábados: 9:00 - 13:00</p>
+                  <p className="text-xs text-gray-400 mt-1">Previa cita</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          {/* Columna 4: Enlaces rápidos */}
+          <div>
+            <h3 className="font-[family-name:var(--font-playfair)] text-lg font-bold text-gold mb-4">
+              Enlaces
+            </h3>
+            <ul className="space-y-2 font-[family-name:var(--font-inter)] text-sm">
+              {["Inicio", "Servicios", "Sobre Mi", "Testimonios", "Contacto"].map((item) => (
+                <li key={item}>
                   <a
-                    href={link.href}
-                    className="font-[family-name:var(--font-inter)] text-sm text-primary-foreground/60 transition-colors hover:text-gold"
+                    href={`#${item.toLowerCase().replace(" ", "-")}`}
+                    className="text-gray-300 hover:text-gold transition-colors"
                   >
-                    {link.label}
+                    {item}
                   </a>
                 </li>
               ))}
-            </ul>
-          </div>
-
-          {/* Services */}
-          <div>
-            <h4 className="font-[family-name:var(--font-playfair)] text-base font-bold text-primary-foreground">
-              Servicios
-            </h4>
-            <ul className="mt-4 space-y-3">
-              {[
-                "Derecho Civil",
-                "Derecho Penal",
-                "Derecho Familiar",
-                "Derecho Mercantil",
-                "Derecho Laboral",
-              ].map((service) => (
-                <li key={service}>
-                  <span className="font-[family-name:var(--font-inter)] text-sm text-primary-foreground/60">
-                    {service}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Contact */}
-          <div>
-            <h4 className="font-[family-name:var(--font-playfair)] text-base font-bold text-primary-foreground">
-              Contacto
-            </h4>
-            <ul className="mt-4 space-y-4">
-              <li className="flex items-start gap-3">
-                <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-gold" />
-                <span className="font-[family-name:var(--font-inter)] text-sm text-primary-foreground/60">
-                  Av. Reforma 123, Col. Centro,<br />Ciudad de Mexico, CDMX
-                </span>
-              </li>
-              <li className="flex items-center gap-3">
-                <Phone className="h-5 w-5 shrink-0 text-gold" />
-                <a href="tel:+525512345678" className="font-[family-name:var(--font-inter)] text-sm text-primary-foreground/60 transition-colors hover:text-gold">
-                  +52 55 1234 5678
+              <li className="mt-4">
+                <a
+                  href="/admin.html"
+                  className="text-gray-300 hover:text-gold transition-colors text-xs"
+                >
+                  Acceso privado
                 </a>
-              </li>
-              <li className="flex items-center gap-3">
-                <Mail className="h-5 w-5 shrink-0 text-gold" />
-                <a href="mailto:contacto@abogada.com" className="font-[family-name:var(--font-inter)] text-sm text-primary-foreground/60 transition-colors hover:text-gold">
-                  contacto@abogada.com
-                </a>
-              </li>
-              <li className="flex items-start gap-3">
-                <Clock className="mt-0.5 h-5 w-5 shrink-0 text-gold" />
-                <span className="font-[family-name:var(--font-inter)] text-sm text-primary-foreground/60">
-                  Lun - Vie: 9:00 - 18:00<br />Sab: 9:00 - 13:00
-                </span>
               </li>
             </ul>
           </div>
         </div>
 
-        {/* Social Media */}
-        <div className="mt-16 border-t border-primary-foreground/10 pt-8">
-          <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
-            <div className="flex items-center gap-4">
-              {/* Facebook */}
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex h-11 w-11 items-center justify-center rounded-full border border-primary-foreground/15 transition-all duration-300 hover:border-gold hover:bg-gold/10 hover:shadow-lg hover:shadow-gold/10"
-                aria-label="Facebook"
-              >
-                <svg className="h-5 w-5 text-primary-foreground/50 transition-colors group-hover:text-gold" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" />
-                </svg>
-              </a>
-
-              {/* Instagram */}
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex h-11 w-11 items-center justify-center rounded-full border border-primary-foreground/15 transition-all duration-300 hover:border-gold hover:bg-gold/10 hover:shadow-lg hover:shadow-gold/10"
-                aria-label="Instagram"
-              >
-                <svg className="h-5 w-5 text-primary-foreground/50 transition-colors group-hover:text-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <rect x="2" y="2" width="20" height="20" rx="5" />
-                  <circle cx="12" cy="12" r="5" />
-                  <circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none" />
-                </svg>
-              </a>
-
-              {/* LinkedIn */}
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex h-11 w-11 items-center justify-center rounded-full border border-primary-foreground/15 transition-all duration-300 hover:border-gold hover:bg-gold/10 hover:shadow-lg hover:shadow-gold/10"
-                aria-label="LinkedIn"
-              >
-                <svg className="h-5 w-5 text-primary-foreground/50 transition-colors group-hover:text-gold" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2zM4 6a2 2 0 100-4 2 2 0 000 4z" />
-                </svg>
-              </a>
-
-              {/* TikTok */}
-              <a
-                href="https://tiktok.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex h-11 w-11 items-center justify-center rounded-full border border-primary-foreground/15 transition-all duration-300 hover:border-gold hover:bg-gold/10 hover:shadow-lg hover:shadow-gold/10"
-                aria-label="TikTok"
-              >
-                <svg className="h-5 w-5 text-primary-foreground/50 transition-colors group-hover:text-gold" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.88-2.88 2.89 2.89 0 012.88-2.88c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 00-.79-.05A6.34 6.34 0 003.15 15.2a6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.34-6.34V9.42a8.16 8.16 0 004.76 1.52v-3.4a4.85 4.85 0 01-1-.85z" />
-                </svg>
-              </a>
-
-              {/* X (Twitter) */}
-              <a
-                href="https://x.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex h-11 w-11 items-center justify-center rounded-full border border-primary-foreground/15 transition-all duration-300 hover:border-gold hover:bg-gold/10 hover:shadow-lg hover:shadow-gold/10"
-                aria-label="X (Twitter)"
-              >
-                <svg className="h-4 w-4 text-primary-foreground/50 transition-colors group-hover:text-gold" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                </svg>
-              </a>
-            </div>
-
-            <p className="font-[family-name:var(--font-inter)] text-sm text-primary-foreground/40">
-              &copy; {new Date().getFullYear()} Abogada. Todos los derechos reservados.
-            </p>
+        {/* Mapa (opcional - si quieres añadirlo después) */}
+        <div className="mt-12">
+          <div className="h-64 w-full bg-gray-800 rounded-lg overflow-hidden">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2993.086274645686!2d2.169936315424072!3d41.39067667926292!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x12a4a2f7c8b7b7b7%3A0x8b7b7b7b7b7b7b7b!2sC%2F%20Bail%C3%A9n%2C%2092%2C%2008009%20Barcelona!5e0!3m2!1ses!2ses!4v1647884523456!5m2!1ses!2ses"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              className="opacity-80 hover:opacity-100 transition-opacity"
+            ></iframe>
           </div>
+        </div>
+
+        {/* Copyright y colegiatura */}
+        <div className="mt-12 pt-8 border-t border-white/10 text-center font-[family-name:var(--font-inter)] text-sm text-gray-400">
+          <p>© {new Date().getFullYear()} Loida Azules Suárez. Todos los derechos reservados.</p>
+          <p className="mt-2 text-xs">Ilustre Colegio de la Abogacía de Barcelona - ICAB · Nº Colegiada: 12345</p>
+          <p className="mt-1 text-xs text-gray-500">
+            C/ Bailén 92 Entlo. 3a esc. izqda · 08009 Barcelona · Tel. +34 604 173 477
+          </p>
         </div>
       </div>
     </footer>

@@ -70,15 +70,12 @@ export function Services() {
           {services.map((service, index) => (
             <ScrollAnimation key={index}>
               <div className="service-card group relative overflow-hidden rounded-xl bg-white p-8 shadow-lg transition-all duration-300 hover:shadow-2xl">
-                {/* Fondo decorativo */}
                 <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-gradient-to-br from-gold/5 to-transparent transition-all duration-300 group-hover:scale-150" />
 
-                {/* Icono */}
                 <div className={`relative mb-6 inline-flex rounded-xl ${service.bgColor} p-4`}>
                   <service.icon className={`h-8 w-8 ${service.color}`} />
                 </div>
 
-                {/* Contenido */}
                 <h3 className="relative font-[family-name:var(--font-playfair)] text-xl font-bold text-navy">
                   {service.title}
                 </h3>
@@ -86,7 +83,6 @@ export function Services() {
                   {service.description}
                 </p>
 
-                {/* Botón */}
                 <div className="relative mt-6">
                   <a
                     href="#agendar"
@@ -102,7 +98,6 @@ export function Services() {
           ))}
         </div>
 
-        {/* Banner de experiencia */}
         <ScrollAnimation>
           <div className="relative mt-20 overflow-hidden rounded-2xl bg-navy p-12 text-center">
             <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-gold/10" />
@@ -111,7 +106,7 @@ export function Services() {
             <div className="relative">
               <Scale className="mx-auto h-16 w-16 text-gold/50" />
               <h3 className="mt-6 font-[family-name:var(--font-playfair)] text-3xl font-bold text-white">
-                15+ Años de experiencia
+                Loida Azules Suárez
               </h3>
               <p className="mx-auto mt-4 max-w-2xl font-[family-name:var(--font-inter)] text-lg text-gray-300">
                 defendiendo tus derechos
@@ -122,8 +117,8 @@ export function Services() {
                   <span className="ml-2 text-white">Casos exitosos</span>
                 </div>
                 <div className="rounded-lg bg-white/10 px-6 py-3 backdrop-blur-sm">
-                  <span className="font-[family-name:var(--font-playfair)] text-2xl font-bold text-gold">100%</span>
-                  <span className="ml-2 text-white">Dedicación</span>
+                  <span className="font-[family-name:var(--font-playfair)] text-2xl font-bold text-gold">15+</span>
+                  <span className="ml-2 text-white">Años experiencia</span>
                 </div>
               </div>
             </div>

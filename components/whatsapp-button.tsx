@@ -8,7 +8,6 @@ export function WhatsAppButton() {
   const [isWorkingHours, setIsWorkingHours] = useState(true);
 
   useEffect(() => {
-    // Verificar horario laboral
     const checkHours = () => {
       const now = new Date();
       const day = now.getDay();
@@ -27,10 +26,7 @@ export function WhatsAppButton() {
 
     checkHours();
     const interval = setInterval(checkHours, 60000);
-
-    const timer = setTimeout(() => {
-      setShowMessage(true);
-    }, 5000);
+    const timer = setTimeout(() => setShowMessage(true), 5000);
 
     return () => {
       clearTimeout(timer);
@@ -39,24 +35,24 @@ export function WhatsAppButton() {
   }, []);
 
   const phoneNumber = "34604173477";
-  const message = "Hola, necesito información sobre una consulta legal.";
+  const message = encodeURIComponent("Hola, necesito información sobre una consulta legal.");
 
-  // Detectar si es móvil o escritorio
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    typeof window !== 'undefined' ? window.navigator.userAgent : ''
-  );
+  const getWhatsAppUrl = () => {
+    // Detectar si es móvil
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
 
-  // Elegir la URL correcta según el dispositivo
-  const whatsappUrl = isMobile
-    ? `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`
-    : `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
-
-  const handleClick = (e: React.MouseEvent) => {
-    if (!isWorkingHours) {
-      e.preventDefault();
-      alert('Solo atendemos en horario laboral: Lunes a Viernes 9:00-14:00 y 16:00-19:00');
+    if (isMobile) {
+      // Para móvil: intenta abrir la app nativa
+      return `whatsapp://send?phone=${phoneNumber}&text=${message}`;
+    } else {
+      // Para escritorio: usa WhatsApp Web
+      return `https://wa.me/${phoneNumber}?text=${message}`;
     }
   };
+
+  const whatsappUrl = getWhatsAppUrl();
 
   if (!isWorkingHours) {
     return (
@@ -65,14 +61,11 @@ export function WhatsAppButton() {
           <button
             disabled
             className="bg-gray-400 text-white p-4 rounded-full shadow-lg cursor-not-allowed opacity-50"
-            aria-label="WhatsApp no disponible fuera de horario"
           >
             <MessageCircle size={24} />
           </button>
           <div className="absolute bottom-16 right-0 bg-white text-navy text-sm p-3 rounded-lg shadow-lg w-48 text-center">
-            ⏰ Horario de atención:<br />
-            Lunes a Viernes<br />
-            9:00 - 14:00 y 16:00 - 19:00
+            ⏰ Lunes a Viernes<br />9:00-14:00 y 16:00-19:00
           </div>
         </div>
       </div>
@@ -84,17 +77,14 @@ export function WhatsAppButton() {
       <div className="relative">
         {showMessage && (
           <div className="absolute bottom-16 right-0 bg-white text-navy text-sm p-3 rounded-lg shadow-lg w-48 text-center animate-pulse">
-            💬 ¿Necesitas ayuda?<br />
-            Escríbenos por WhatsApp
+            💬 ¿Necesitas ayuda?
           </div>
         )}
         <a
           href={whatsappUrl}
-          onClick={handleClick}
           target="_blank"
           rel="noopener noreferrer"
           className="bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-lg transition-all duration-300 hover:scale-110 flex items-center justify-center"
-          aria-label="Contactar por WhatsApp"
         >
           <MessageCircle size={24} />
         </a>

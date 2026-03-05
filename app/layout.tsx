@@ -17,9 +17,9 @@ export const metadata: Metadata = {
   title: "Loida Azules - Abogada",
   description: "Servicios legales profesionales con más de 15 años de experiencia.",
   icons: {
-    icon: "/favicon.png?v=2",
-    shortcut: "/favicon.png?v=2",
-    apple: "/favicon.png?v=2",
+    icon: "/favicon.png?v=3",
+    shortcut: "/favicon.png?v=3",
+    apple: "/favicon.png?v=3",
   },
 };
 
@@ -31,9 +31,10 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
-        <link rel="icon" href="/favicon.png?v=2" />
-        <link rel="shortcut icon" href="/favicon.png?v=2" />
-        <link rel="apple-touch-icon" href="/favicon.png?v=2" />
+        <link rel="icon" href="/favicon.png?v=3" />
+        <link rel="shortcut icon" href="/favicon.png?v=3" />
+        <link rel="apple-touch-icon" href="/favicon.png?v=3" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body className={`${inter.variable} ${playfair.variable} antialiased`}>
         <ThemeProvider

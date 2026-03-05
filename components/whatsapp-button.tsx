@@ -8,30 +8,26 @@ export function WhatsAppButton() {
   const [isWorkingHours, setIsWorkingHours] = useState(true);
 
   useEffect(() => {
-    // Verificar si está dentro del horario laboral
+    // Verificar horario laboral
     const checkHours = () => {
       const now = new Date();
-      const day = now.getDay(); // 0 = domingo, 1 = lunes, ..., 5 = viernes, 6 = sábado
+      const day = now.getDay();
       const hour = now.getHours();
       const minutes = now.getMinutes();
       const currentTime = hour + minutes / 60;
 
-      // Lunes a viernes (1-5)
       if (day >= 1 && day <= 5) {
-        // Mañana: 9:00 - 14:00
-        // Tarde: 16:00 - 19:00
         const isMorning = currentTime >= 9 && currentTime < 14;
         const isAfternoon = currentTime >= 16 && currentTime < 19;
         setIsWorkingHours(isMorning || isAfternoon);
       } else {
-        setIsWorkingHours(false); // Fines de semana
+        setIsWorkingHours(false);
       }
     };
 
     checkHours();
-    const interval = setInterval(checkHours, 60000); // Revisar cada minuto
+    const interval = setInterval(checkHours, 60000);
 
-    // Mostrar mensaje después de 5 segundos
     const timer = setTimeout(() => {
       setShowMessage(true);
     }, 5000);
@@ -42,9 +38,25 @@ export function WhatsAppButton() {
     };
   }, []);
 
-  const phoneNumber = "34604173477"; // Sin el +
+  const phoneNumber = "34604173477";
   const message = "Hola, necesito información sobre una consulta legal.";
-  const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+
+  // Detectar si es móvil o escritorio
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    typeof window !== 'undefined' ? window.navigator.userAgent : ''
+  );
+
+  // Elegir la URL correcta según el dispositivo
+  const whatsappUrl = isMobile
+    ? `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`
+    : `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (!isWorkingHours) {
+      e.preventDefault();
+      alert('Solo atendemos en horario laboral: Lunes a Viernes 9:00-14:00 y 16:00-19:00');
+    }
+  };
 
   if (!isWorkingHours) {
     return (
@@ -78,6 +90,7 @@ export function WhatsAppButton() {
         )}
         <a
           href={whatsappUrl}
+          onClick={handleClick}
           target="_blank"
           rel="noopener noreferrer"
           className="bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-lg transition-all duration-300 hover:scale-110 flex items-center justify-center"

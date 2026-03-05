@@ -15,10 +15,11 @@ const playfair = Playfair_Display({
 
 export const metadata: Metadata = {
   title: "Loida Azules - Abogada",
-  description: "Servicios legales profesionales con más de 15 años de experiencia. Derecho Civil, Penal, Familiar, Mercantil y Laboral.",
+  description: "Servicios legales profesionales con más de 15 años de experiencia.",
   icons: {
-    icon: '/favicon.png',
-    apple: '/apple-icon.png',
+    icon: "/favicon.png?v=2",
+    shortcut: "/favicon.png?v=2",
+    apple: "/favicon.png?v=2",
   },
 };
 
@@ -29,6 +30,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/favicon.png?v=2" />
+        <link rel="shortcut icon" href="/favicon.png?v=2" />
+        <link rel="apple-touch-icon" href="/favicon.png?v=2" />
+      </head>
       <body className={`${inter.variable} ${playfair.variable} antialiased`}>
         <ThemeProvider
           attribute="class"

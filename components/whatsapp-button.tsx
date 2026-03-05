@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { MessageCircle } from 'lucide-react';
 
 export function WhatsAppButton() {
+  const [showMessage, setShowMessage] = useState(false);
   const [isWorkingHours, setIsWorkingHours] = useState(true);
   const [isClient, setIsClient] = useState(false);
 
@@ -30,8 +31,12 @@ export function WhatsAppButton() {
 
     checkHours();
     const interval = setInterval(checkHours, 60000);
+    const timer = setTimeout(() => setShowMessage(true), 5000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearTimeout(timer);
+      clearInterval(interval);
+    };
   }, []);
 
   const phoneNumber = "34604173477";
@@ -48,14 +53,11 @@ export function WhatsAppButton() {
     );
 
     if (isMobile) {
+      // Intentar abrir la app de WhatsApp
       const whatsappUrl = `whatsapp://send?phone=${phoneNumber}&text=${message}`;
-      const link = document.createElement('a');
-      link.href = whatsappUrl;
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      window.location.href = whatsappUrl;
       
+      // Fallback por si no abre
       setTimeout(() => {
         window.location.href = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${message}`;
       }, 500);

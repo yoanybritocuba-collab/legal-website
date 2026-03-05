@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Loida Azules</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f3f4f6; padding: 20px; }
+        .header {
+            background: #1e3a8a;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn-logout {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn-web {
+            background: #059669;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            margin-right: 10px;
+        }
+        table {
+            width: 100%;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        th {
+            background: #f8f9fa;
+            padding: 12px;
+            text-align: left;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .btn-eliminar {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+</head>
+<body>
+    <div class="header">
+        <h1>📋 Citas Agendadas</h1>
+        <div>
+            <span id="userEmail" style="margin-right: 20px;"></span>
+            <a href="/" class="btn-web">🌐 Ver Web</a>
+            <button onclick="logout()" class="btn-logout">Cerrar Sesión</button>
+        </div>
+    </div>
+
+    <div id="citasTable"></div>
+    <div id="totalCitas" style="margin-top: 20px; text-align: right; font-weight: bold;"></div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDWW9yBXF3sEyAkXLdXQn5AIhRGuEMUIQ4",
+            authDomain: "legal-website-6035a.firebaseapp.com",
+            projectId: "legal-website-6035a",
+            storageBucket: "legal-website-6035a.firebasestorage.app",
+            messagingSenderId: "360533778063",
+            appId: "1:360533778063:web:298b723f3fbae696621afa"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        document.getElementById('userEmail').textContent = auth.currentUser?.email || '';
+
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.href = '/admin.html';
+            });
+        }
+
+        db.collection('appointments').orderBy('fecha', 'desc').onSnapshot((snapshot) => {
+            let html = '<table><thead><tr><th>Fecha</th><th>Hora</th><th>Cliente</th><th>Email</th><th>Teléfono</th><th>Motivo</th><th>Acción</th></tr></thead><tbody>';
+            
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                html += `<tr>
+                    <td>${data.fecha || ''}</td>
+                    <td>${data.hora || ''}</td>
+                    <td>${data.nombre || ''}</td>
+                    <td>${data.email || ''}</td>
+                    <td>${data.telefono || ''}</td>
+                    <td>${data.motivo || ''}</td>
+                    <td><button class="btn-eliminar" onclick="eliminarCita('${doc.id}')">Eliminar</button></td>
+                </tr>`;
+            });
+
+            html += '</tbody></table>';
+            document.getElementById('citasTable').innerHTML = html;
+            document.getElementById('totalCitas').textContent = `Total: ${snapshot.size} citas`;
+        });
+
+        window.eliminarCita = function(id) {
+            if (confirm('¿Eliminar esta cita?')) {
+                db.collection('appointments').doc(id).delete();
+            }
+        };
+    </script>
+</body>
+</html>

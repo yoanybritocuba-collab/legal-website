@@ -35,21 +35,21 @@ export default function Navbar() {
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
-          ? "bg-navy/95 backdrop-blur-md shadow-lg"
+          ? "bg-navy-deep/95 backdrop-blur-md shadow-lg"
           : "bg-transparent"
       }`}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
           <a href="#inicio" className="flex items-center gap-3">
-            <div className="bg-gold/20 p-3 rounded-full">
-              <Scale className="h-8 w-8 text-gold" />
+            <div className="bg-gold-classic/20 p-3 rounded-full">
+              <Scale className="h-8 w-8 text-gold-classic" />
             </div>
             <div className="flex flex-col">
-              <span className="font-[family-name:var(--font-playfair)] text-lg font-bold tracking-wide text-primary-foreground">
+              <span className="font-[family-name:var(--font-playfair)] text-lg font-bold tracking-wide text-white">
                 LOIDA AZULES
               </span>
-              <span className="font-[family-name:var(--font-inter)] text-[10px] uppercase tracking-[0.3em] text-gold">
+              <span className="font-[family-name:var(--font-inter)] text-[10px] uppercase tracking-[0.3em] text-gold-classic">
                 Abogada
               </span>
             </div>
@@ -61,7 +61,7 @@ export default function Navbar() {
                 key={link.href}
                 href={link.href}
                 onClick={link.label === "Contacto" ? handleContactClick : undefined}
-                className="font-[family-name:var(--font-inter)] text-sm font-medium text-primary-foreground/80 transition-colors duration-300 hover:text-gold"
+                className="font-[family-name:var(--font-inter)] text-sm font-medium text-white/80 transition-colors duration-300 hover:text-gold-classic"
               >
                 {link.label}
               </a>
@@ -69,14 +69,14 @@ export default function Navbar() {
 
             <a
               href="/admin.html"
-              className="px-4 py-2 border-2 border-gold text-gold rounded-sm hover:bg-gold hover:text-navy transition-all duration-300 font-[family-name:var(--font-inter)] text-sm font-medium"
+              className="px-4 py-2 border-2 border-gold-classic text-gold-classic rounded-sm hover:bg-gold-classic hover:text-navy-deep transition-all duration-300 font-[family-name:var(--font-inter)] text-sm font-medium"
             >
               Admin
             </a>
 
             <a
               href="#agendar"
-              className="rounded-sm bg-gold px-6 py-2.5 font-[family-name:var(--font-inter)] text-sm font-semibold text-navy transition-all duration-300 hover:bg-gold/90 hover:shadow-lg hover:shadow-gold/20 hover-lift"
+              className="rounded-sm bg-gold-classic px-6 py-2.5 font-[family-name:var(--font-inter)] text-sm font-semibold text-navy-deep transition-all duration-300 hover:bg-gold-classic/90 hover:shadow-lg hover:shadow-gold-classic/20 hover-lift"
             >
               Agendar Cita
             </a>
@@ -84,7 +84,7 @@ export default function Navbar() {
 
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="text-primary-foreground md:hidden"
+            className="text-white md:hidden"
             aria-label={isOpen ? "Cerrar menu" : "Abrir menu"}
           >
             {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -93,7 +93,7 @@ export default function Navbar() {
       </div>
 
       {isOpen && (
-        <div className="bg-navy/98 backdrop-blur-lg md:hidden">
+        <div className="bg-navy-deep/98 backdrop-blur-lg md:hidden">
           <div className="flex flex-col gap-1 px-4 pb-6 pt-2">
             {navLinks.map((link) => (
               <a
@@ -107,7 +107,7 @@ export default function Navbar() {
                     if (footer) footer.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
-                className="rounded-sm px-4 py-3 font-[family-name:var(--font-inter)] text-sm text-primary-foreground/80 transition-colors hover:bg-primary-foreground/5 hover:text-gold"
+                className="rounded-sm px-4 py-3 font-[family-name:var(--font-inter)] text-sm text-white/80 transition-colors hover:bg-white/5 hover:text-gold-classic"
               >
                 {link.label}
               </a>
@@ -116,7 +116,7 @@ export default function Navbar() {
             <a
               href="/admin.html"
               onClick={() => setIsOpen(false)}
-              className="rounded-sm px-4 py-3 font-[family-name:var(--font-inter)] text-sm text-primary-foreground/80 transition-colors hover:bg-primary-foreground/5 hover:text-gold"
+              className="rounded-sm px-4 py-3 font-[family-name:var(--font-inter)] text-sm text-white/80 transition-colors hover:bg-white/5 hover:text-gold-classic"
             >
               Admin
             </a>
@@ -124,7 +124,7 @@ export default function Navbar() {
             <a
               href="#agendar"
               onClick={() => setIsOpen(false)}
-              className="mt-3 rounded-sm bg-gold px-6 py-3 text-center font-[family-name:var(--font-inter)] text-sm font-semibold text-navy hover-lift"
+              className="mt-3 rounded-sm bg-gold-classic px-6 py-3 text-center font-[family-name:var(--font-inter)] text-sm font-semibold text-navy-deep hover-lift"
             >
               Agendar Cita
             </a>

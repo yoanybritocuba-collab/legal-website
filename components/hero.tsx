@@ -10,24 +10,30 @@ export function Hero() {
   return (
     <section
       id="inicio"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden parallax"
-      style={{
-        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/images/hero-lawyer.jpg')`,
-      }}
+      className="relative min-h-screen flex items-center justify-center overflow-hidden"
     >
-      <div className="absolute inset-0 bg-gradient-to-b from-navy/50 via-transparent to-navy/80" />
+      {/* Fondo con overlay */}
+      <div className="absolute inset-0">
+        <img 
+          src="/images/hero-lawyer.jpg" 
+          alt="Fondo" 
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-navy/80 via-navy/60 to-navy/80"></div>
+      </div>
 
+      {/* Contenido */}
       <div className="relative z-10 mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-        <div className="inline-flex items-center gap-2 rounded-full bg-gold/20 px-4 py-2 backdrop-blur-sm mb-8">
+        <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-6 py-3 backdrop-blur-sm border border-gold/30 mb-8">
           <Scale className="h-4 w-4 text-gold" />
-          <span className="font-[family-name:var(--font-inter)] text-xs font-medium uppercase tracking-wider text-gold">
-            Loida Azules Suárez
+          <span className="font-[family-name:var(--font-inter)] text-xs font-medium uppercase tracking-wider text-white">
+            Loida Azules Suárez · ICAB
           </span>
         </div>
 
-        <h1 className="font-[family-name:var(--font-playfair)] text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl text-balance">
-          Justicia y Excelencia Legal
-          <span className="block text-gold">a tu Servicio</span>
+        <h1 className="font-[family-name:var(--font-playfair)] text-5xl font-bold tracking-tight text-white sm:text-6xl md:text-7xl lg:text-8xl text-balance">
+          Justicia y Excelencia
+          <span className="block text-gold mt-2">a tu Servicio</span>
         </h1>
 
         <p className="mx-auto mt-6 max-w-2xl font-[family-name:var(--font-inter)] text-lg text-gray-200 sm:text-xl">
@@ -38,7 +44,7 @@ export function Hero() {
         <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
           <button
             onClick={scrollToServices}
-            className="group relative overflow-hidden rounded-sm bg-gold px-8 py-4 font-[family-name:var(--font-inter)] text-sm font-semibold text-navy transition-all duration-300 hover:bg-gold/90 hover:shadow-lg hover:shadow-gold/20"
+            className="group relative overflow-hidden rounded-sm bg-gold px-8 py-4 font-[family-name:var(--font-inter)] text-sm font-semibold text-navy transition-all duration-300 hover:bg-gold/90 hover:shadow-lg hover:shadow-gold/20 hover-lift"
           >
             <span className="relative z-10">Conoce mis servicios</span>
             <div className="absolute inset-0 -translate-x-full transform bg-white/20 transition-transform duration-300 group-hover:translate-x-0" />
@@ -46,23 +52,24 @@ export function Hero() {
 
           <a
             href="#agendar"
-            className="rounded-sm border-2 border-white/30 px-8 py-4 font-[family-name:var(--font-inter)] text-sm font-semibold text-white transition-all duration-300 hover:border-gold hover:bg-white/10"
+            className="rounded-sm border-2 border-gold px-8 py-4 font-[family-name:var(--font-inter)] text-sm font-semibold text-white transition-all duration-300 hover:bg-gold hover:text-navy hover:shadow-lg hover:shadow-gold/20"
           >
             Agenda tu consulta
           </a>
         </div>
 
+        {/* Estadísticas */}
         <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-3">
-          <div className="rounded-lg bg-white/10 p-6 backdrop-blur-sm">
-            <div className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-gold">15+</div>
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-gold/20">
+            <div className="font-[family-name:var(--font-playfair)] text-4xl font-bold text-gold">15+</div>
             <div className="mt-2 font-[family-name:var(--font-inter)] text-sm text-gray-200">Años de Experiencia</div>
           </div>
-          <div className="rounded-lg bg-white/10 p-6 backdrop-blur-sm">
-            <div className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-gold">500+</div>
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-gold/20">
+            <div className="font-[family-name:var(--font-playfair)] text-4xl font-bold text-gold">500+</div>
             <div className="mt-2 font-[family-name:var(--font-inter)] text-sm text-gray-200">Casos Ganados</div>
           </div>
-          <div className="rounded-lg bg-white/10 p-6 backdrop-blur-sm">
-            <div className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-gold">24h</div>
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-gold/20">
+            <div className="font-[family-name:var(--font-playfair)] text-4xl font-bold text-gold">24h</div>
             <div className="mt-2 font-[family-name:var(--font-inter)] text-sm text-gray-200">Respuesta Rápida</div>
           </div>
         </div>

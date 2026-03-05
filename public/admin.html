@@ -56,83 +56,6 @@
             border-radius: 5px;
             display: none;
         }
-        .panel-container {
-            min-height: 100vh;
-            padding: 20px;
-            display: none;
-        }
-        .panel-header {
-            background: #1e3a8a;
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .header-buttons {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        .btn-web {
-            background: #059669;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .btn-web:hover { background: #047857; }
-        .btn-logout {
-            background: #dc2626;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .btn-logout:hover { background: #b91c1c; }
-        .panel-content {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th {
-            background: #f8f9fa;
-            padding: 12px;
-            text-align: left;
-            border-bottom: 2px solid #dee2e6;
-        }
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #dee2e6;
-        }
-        .btn-eliminar {
-            background: #dc2626;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .btn-eliminar:hover { background: #b91c1c; }
-        .total {
-            margin-top: 20px;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 5px;
-            text-align: right;
-            font-weight: bold;
-        }
     </style>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
@@ -143,25 +66,9 @@
         <div class="login-box">
             <h1>Panel Loida Azules</h1>
             <div id="errorMessage" class="error"></div>
-            <input type="email" id="email" placeholder="Email" value="" autocomplete="off">
-            <input type="password" id="password" placeholder="Contraseña" value="" autocomplete="off">
+            <input type="email" id="email" placeholder="Email" value="loyanzules@icab.cat">
+            <input type="password" id="password" placeholder="Contraseña" value="Abogada2024">
             <button onclick="login()">Iniciar Sesión</button>
-        </div>
-    </div>
-
-    <div id="panelContainer" class="panel-container">
-        <div class="panel-header">
-            <h1>📋 Citas Agendadas</h1>
-            <div class="header-buttons">
-                <span id="userEmail" style="color: #e0f2fe;"></span>
-                <a href="/" class="btn-web">🌐 Ver Web</a>
-                <button onclick="logout()" class="btn-logout">Cerrar Sesión</button>
-            </div>
-        </div>
-        
-        <div class="panel-content">
-            <div id="citasTable"></div>
-            <div id="totalCitas" class="total"></div>
         </div>
     </div>
 
@@ -177,95 +84,23 @@
 
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
-        const db = firebase.firestore();
-
-        const loginContainer = document.getElementById('loginContainer');
-        const panelContainer = document.getElementById('panelContainer');
-        const errorMessage = document.getElementById('errorMessage');
-        const userEmailSpan = document.getElementById('userEmail');
-
-        // Limpiar campos al cargar
-        document.getElementById('email').value = '';
-        document.getElementById('password').value = '';
-
-        // Verificar sesión
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                loginContainer.style.display = 'none';
-                panelContainer.style.display = 'block';
-                userEmailSpan.textContent = user.email;
-                cargarCitas();
-            } else {
-                loginContainer.style.display = 'flex';
-                panelContainer.style.display = 'none';
-                document.getElementById('email').value = '';
-                document.getElementById('password').value = '';
-            }
-        });
 
         window.login = function() {
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value.trim();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('errorMessage');
             
             errorMessage.style.display = 'none';
             
-            if (!email || !password) {
-                errorMessage.textContent = 'Por favor ingresa email y contraseña';
-                errorMessage.style.display = 'block';
-                return;
-            }
-
             auth.signInWithEmailAndPassword(email, password)
+                .then(() => {
+                    window.location.href = '/admin-dashboard.html';
+                })
                 .catch((error) => {
-                    let mensaje = 'Email o contraseña incorrectos';
-                    if (error.code === 'auth/network-request-failed') {
-                        mensaje = 'Error de conexión. Verifica tu internet.';
-                    } else if (error.code === 'auth/too-many-requests') {
-                        mensaje = 'Demasiados intentos. Espera unos minutos.';
-                    }
-                    errorMessage.textContent = mensaje;
+                    errorMessage.textContent = 'Email o contraseña incorrectos';
                     errorMessage.style.display = 'block';
-                    console.error(error);
                 });
         };
-
-        window.logout = function() {
-            auth.signOut();
-        };
-
-        function cargarCitas() {
-            db.collection('appointments').orderBy('fecha', 'desc').onSnapshot((snapshot) => {
-                let html = '<table><thead><tr><th>Fecha</th><th>Hora</th><th>Cliente</th><th>Email</th><th>Teléfono</th><th>Motivo</th><th>Acción</th></tr></thead><tbody>';
-                
-                snapshot.forEach((doc) => {
-                    const data = doc.data();
-                    html += `<tr>
-                        <td>${data.fecha || ''}</td>
-                        <td>${data.hora || ''}</td>
-                        <td>${data.nombre || ''}</td>
-                        <td>${data.email || ''}</td>
-                        <td>${data.telefono || ''}</td>
-                        <td>${data.motivo || ''}</td>
-                        <td><button class="btn-eliminar" onclick="eliminarCita('${doc.id}')">Eliminar</button></td>
-                    </tr>`;
-                });
-
-                html += '</tbody></table>';
-                document.getElementById('citasTable').innerHTML = html;
-                document.getElementById('totalCitas').textContent = `Total: ${snapshot.size} citas`;
-            });
-        }
-
-        window.eliminarCita = function(id) {
-            if (confirm('¿Eliminar esta cita?')) {
-                db.collection('appointments').doc(id).delete();
-            }
-        };
-
-        // Cerrar sesión al cerrar pestaña
-        window.addEventListener('beforeunload', function() {
-            auth.signOut();
-        });
     </script>
 </body>
 </html>

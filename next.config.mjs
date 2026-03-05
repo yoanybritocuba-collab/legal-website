@@ -5,10 +5,7 @@ const nextConfig = {
     unoptimized: true,
   },
   trailingSlash: true,
-  // Desactivar optimización de fuentes para evitar advertencias
-  experimental: {
-    optimizeFonts: false,
-  },
+  // La opción optimizeFonts ya no es necesaria ni válida en esta versión
 };
 
 export default nextConfig;

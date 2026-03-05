@@ -6,18 +6,21 @@ import { Testimonials } from "@/components/testimonials"
 import { AppointmentBooking } from "@/components/appointment-booking"
 import { Footer } from "@/components/footer"
 import { WhatsAppButton } from "@/components/whatsapp-button"
+import BackToTop from "@/components/back-to-top"
+import ScrollAnimation from "@/components/scroll-animation"
 
 export default function Home() {
   return (
     <main className="min-h-screen">
       <Navbar />
       <Hero />
-      <Services />
-      <About />
-      <Testimonials />
-      <AppointmentBooking />
+      <ScrollAnimation><Services /></ScrollAnimation>
+      <ScrollAnimation><About /></ScrollAnimation>
+      <ScrollAnimation><Testimonials /></ScrollAnimation>
+      <ScrollAnimation><AppointmentBooking /></ScrollAnimation>
       <Footer />
       <WhatsAppButton />
+      <BackToTop />
     </main>
   )
 }

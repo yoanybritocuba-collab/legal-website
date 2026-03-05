@@ -57,7 +57,7 @@ export default function Navbar() {
             ))}
 
             <a
-              href="/panel-abogada.html"
+              href="/admin.html"
               className="font-[family-name:var(--font-inter)] text-sm font-medium text-primary-foreground/80 transition-colors duration-300 hover:text-gold"
             >
               Admin
@@ -96,7 +96,7 @@ export default function Navbar() {
             ))}
 
             <a
-              href="/panel-abogada.html"
+              href="/admin.html"
               onClick={() => setIsOpen(false)}
               className="rounded-sm px-4 py-3 font-[family-name:var(--font-inter)] text-sm text-primary-foreground/80 transition-colors hover:bg-primary-foreground/5 hover:text-gold"
             >

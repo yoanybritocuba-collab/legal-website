@@ -1,113 +1,138 @@
 "use client"
 
 import { useState } from "react"
-import { Star, ChevronLeft, ChevronRight, Quote } from "lucide-react"
+import { ChevronLeft, ChevronRight, Star, Quote } from "lucide-react"
+import Image from "next/image"
+import ScrollAnimation from "./scroll-animation"
 
 const testimonials = [
   {
-    name: "Maria Fernandez",
+    name: "María Fernández",
     role: "Caso Civil",
-    text: "Gracias a su dedicacion y profesionalismo, logre resolver mi caso de propiedad que llevaba anos sin solucion. Su conocimiento del derecho civil es excepcional.",
+    content: "Gracias a su dedicación y profesionalismo, logré resolver mi caso de propiedad que llevaba años sin solución. Su conocimiento del derecho civil es excepcional.",
     rating: 5,
+    image: "/images/testimonial-1.jpg",
   },
   {
-    name: "Carlos Rodriguez",
-    role: "Caso Laboral",
-    text: "Me ayudo a obtener la indemnizacion que me correspondia despues de un despido injustificado. Todo el proceso fue transparente y me mantuve informado en cada paso.",
+    name: "Carlos Rodríguez",
+    role: "Caso Penal",
+    content: "En un momento difícil, su defensa penal fue impecable. Obtuvimos un resultado favorable que cambió mi vida. La recomiendo ampliamente.",
     rating: 5,
+    image: "/images/testimonial-2.jpg",
   },
   {
-    name: "Ana Patricia Gomez",
-    role: "Caso Familiar",
-    text: "En un momento tan dificil como mi proceso de divorcio, encontre en ella no solo una gran abogada sino una persona empatica que me guio con profesionalismo.",
+    name: "Ana Martínez",
+    role: "Derecho Familiar",
+    content: "Su sensibilidad y conocimiento en derecho familiar hicieron que un proceso difícil fuera llevadero. Logramos un acuerdo justo para ambas partes.",
     rating: 5,
-  },
-  {
-    name: "Roberto Sanchez",
-    role: "Caso Mercantil",
-    text: "La constitucion de mi empresa fue mucho mas sencilla gracias a su asesoria. Ahora cuento con toda la documentacion legal en orden para operar con tranquilidad.",
-    rating: 5,
+    image: "/images/testimonial-3.jpg",
   },
 ]
 
 export function Testimonials() {
   const [current, setCurrent] = useState(0)
 
-  const next = () => setCurrent((prev) => (prev + 1) % testimonials.length)
-  const prev = () => setCurrent((prev) => (prev - 1 + testimonials.length) % testimonials.length)
+  const next = () => {
+    setCurrent((prev) => (prev + 1) % testimonials.length)
+  }
+
+  const prev = () => {
+    setCurrent((prev) => (prev - 1 + testimonials.length) % testimonials.length)
+  }
 
   return (
-    <section id="testimonios" className="bg-navy py-24 lg:py-32">
+    <section id="testimonios" className="bg-gradient-to-b from-gray-50 to-white py-24 lg:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
-          <span className="font-[family-name:var(--font-inter)] text-sm font-medium uppercase tracking-[0.2em] text-gold">
-            Testimonios
-          </span>
-          <h2 className="mt-4 font-[family-name:var(--font-playfair)] text-3xl font-bold text-primary-foreground sm:text-4xl lg:text-5xl text-balance">
-            Lo que Dicen Nuestros Clientes
-          </h2>
-        </div>
+        <ScrollAnimation>
+          <div className="text-center">
+            <span className="font-[family-name:var(--font-inter)] text-sm font-medium uppercase tracking-[0.2em] text-gold">
+              Testimonios
+            </span>
+            <h2 className="mt-4 font-[family-name:var(--font-playfair)] text-3xl font-bold text-navy sm:text-4xl lg:text-5xl text-balance">
+              Lo que Dicen Nuestros Clientes
+            </h2>
+          </div>
+        </ScrollAnimation>
 
         <div className="relative mt-16">
-          <div className="mx-auto max-w-3xl">
-            <div className="relative rounded-2xl border border-primary-foreground/10 bg-primary-foreground/5 p-8 backdrop-blur sm:p-12">
-              <Quote className="absolute left-6 top-6 h-12 w-12 text-gold/20 sm:left-8 sm:top-8" />
+          {/* Decoración */}
+          <div className="absolute -left-4 -top-4 h-40 w-40 rounded-full bg-gold/5 blur-2xl" />
+          <div className="absolute -bottom-4 -right-4 h-40 w-40 rounded-full bg-navy/5 blur-2xl" />
 
-              <div className="relative">
-                <div className="flex gap-1">
-                  {Array.from({ length: testimonials[current].rating }).map((_, i) => (
-                    <Star key={i} className="h-5 w-5 fill-gold text-gold" />
-                  ))}
-                </div>
+          {/* Carrusel */}
+          <div className="relative mx-auto max-w-4xl overflow-hidden rounded-2xl bg-white shadow-xl">
+            <div
+              className="flex transition-transform duration-500 ease-out"
+              style={{ transform: `translateX(-${current * 100}%)` }}
+            >
+              {testimonials.map((testimonial, index) => (
+                <div key={index} className="w-full flex-shrink-0 p-8 md:p-12">
+                  <div className="flex flex-col items-center text-center">
+                    {/* Comillas decorativas */}
+                    <Quote className="h-12 w-12 text-gold/20" />
 
-                <blockquote className="mt-6 font-[family-name:var(--font-inter)] text-lg leading-relaxed text-primary-foreground/90 sm:text-xl">
-                  &ldquo;{testimonials[current].text}&rdquo;
-                </blockquote>
-
-                <div className="mt-8 flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gold/20 font-[family-name:var(--font-playfair)] text-lg font-bold text-gold">
-                    {testimonials[current].name[0]}
-                  </div>
-                  <div>
-                    <div className="font-[family-name:var(--font-inter)] text-sm font-semibold text-primary-foreground">
-                      {testimonials[current].name}
+                    {/* Estrellas */}
+                    <div className="mt-4 flex gap-1">
+                      {[...Array(testimonial.rating)].map((_, i) => (
+                        <Star key={i} className="h-5 w-5 fill-gold text-gold" />
+                      ))}
                     </div>
-                    <div className="font-[family-name:var(--font-inter)] text-xs text-primary-foreground/50">
-                      {testimonials[current].role}
+
+                    {/* Testimonio */}
+                    <p className="mt-6 font-[family-name:var(--font-inter)] text-lg text-gray-700 md:text-xl">
+                      "{testimonial.content}"
+                    </p>
+
+                    {/* Autor */}
+                    <div className="mt-8 flex items-center gap-4">
+                      <div className="relative h-16 w-16 overflow-hidden rounded-full">
+                        <Image
+                          src={testimonial.image}
+                          alt={testimonial.name}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <div className="text-left">
+                        <div className="font-[family-name:var(--font-playfair)] text-lg font-bold text-navy">
+                          {testimonial.name}
+                        </div>
+                        <div className="font-[family-name:var(--font-inter)] text-sm text-gold">
+                          {testimonial.role}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              ))}
             </div>
-          </div>
 
-          <div className="mt-8 flex items-center justify-center gap-4">
+            {/* Controles */}
             <button
               onClick={prev}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-primary-foreground/20 text-primary-foreground/60 transition-all hover:border-gold hover:text-gold"
-              aria-label="Testimonio anterior"
+              className="absolute left-4 top-1/2 -translate-y-1/2 transform rounded-full bg-white p-2 shadow-lg transition-all hover:bg-gold hover:text-white"
             >
-              <ChevronLeft className="h-5 w-5" />
+              <ChevronLeft className="h-6 w-6" />
             </button>
-            <div className="flex gap-2">
-              {testimonials.map((_, i) => (
+            <button
+              onClick={next}
+              className="absolute right-4 top-1/2 -translate-y-1/2 transform rounded-full bg-white p-2 shadow-lg transition-all hover:bg-gold hover:text-white"
+            >
+              <ChevronRight className="h-6 w-6" />
+            </button>
+
+            {/* Indicadores */}
+            <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 transform gap-2">
+              {testimonials.map((_, index) => (
                 <button
-                  key={i}
-                  onClick={() => setCurrent(i)}
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    i === current ? "w-8 bg-gold" : "w-2 bg-primary-foreground/20"
+                  key={index}
+                  onClick={() => setCurrent(index)}
+                  className={`h-2 w-2 rounded-full transition-all ${
+                    index === current ? "w-8 bg-gold" : "bg-gray-300"
                   }`}
-                  aria-label={`Ir al testimonio ${i + 1}`}
                 />
               ))}
             </div>
-            <button
-              onClick={next}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-primary-foreground/20 text-primary-foreground/60 transition-all hover:border-gold hover:text-gold"
-              aria-label="Siguiente testimonio"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </button>
           </div>
         </div>
       </div>

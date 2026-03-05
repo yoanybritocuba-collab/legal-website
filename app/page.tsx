@@ -1,23 +1,21 @@
-import { Navbar } from "@/components/navbar"
+import Navbar from "@/components/navbar"
 import { Hero } from "@/components/hero"
 import { Services } from "@/components/services"
 import { About } from "@/components/about"
-import { AppointmentBooking } from "@/components/appointment-booking"
-import { CtaBanner } from "@/components/cta-banner"
 import { Testimonials } from "@/components/testimonials"
+import { AppointmentBooking } from "@/components/appointment-booking"
 import { Footer } from "@/components/footer"
 import { WhatsAppButton } from "@/components/whatsapp-button"
 
 export default function Home() {
   return (
-    <main>
+    <main className="min-h-screen">
       <Navbar />
       <Hero />
       <Services />
       <About />
-      <AppointmentBooking />
-      <CtaBanner />
       <Testimonials />
+      <AppointmentBooking />
       <Footer />
       <WhatsAppButton />
     </main>

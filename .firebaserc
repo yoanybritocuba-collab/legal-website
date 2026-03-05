@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "legal-website-6035a"
+  },
+  "targets": {
+    "legal-website-6035a": {
+      "hosting": {
+        "legal-website-6035a": [
+          "legal-website-6035a"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

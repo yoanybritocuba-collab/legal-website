@@ -11,7 +11,7 @@ const navLinks = [
   { label: "Contacto", href: "#contacto" },
 ]
 
-export function Navbar() {
+export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
@@ -55,6 +55,14 @@ export function Navbar() {
                 {link.label}
               </a>
             ))}
+
+            <a
+              href="/panel-abogada.html"
+              className="font-[family-name:var(--font-inter)] text-sm font-medium text-primary-foreground/80 transition-colors duration-300 hover:text-gold"
+            >
+              Admin
+            </a>
+
             <a
               href="#agendar"
               className="rounded-sm bg-gold px-6 py-2.5 font-[family-name:var(--font-inter)] text-sm font-semibold text-navy transition-all duration-300 hover:bg-gold/90 hover:shadow-lg"
@@ -86,6 +94,15 @@ export function Navbar() {
                 {link.label}
               </a>
             ))}
+
+            <a
+              href="/panel-abogada.html"
+              onClick={() => setIsOpen(false)}
+              className="rounded-sm px-4 py-3 font-[family-name:var(--font-inter)] text-sm text-primary-foreground/80 transition-colors hover:bg-primary-foreground/5 hover:text-gold"
+            >
+              Admin
+            </a>
+
             <a
               href="#agendar"
               onClick={() => setIsOpen(false)}

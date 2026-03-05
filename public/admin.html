@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Abogada</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f3f4f6; }
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        .login-box h1 {
+            text-align: center;
+            color: #1e3a8a;
+            margin-bottom: 30px;
+        }
+        .login-box input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .login-box button {
+            width: 100%;
+            padding: 14px;
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .login-box button:hover { background: #2563eb; }
+        .login-box .error {
+            color: #dc2626;
+            text-align: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #fee2e2;
+            border-radius: 5px;
+            display: none;
+        }
+        .panel-container {
+            min-height: 100vh;
+            padding: 20px;
+            display: none;
+        }
+        .panel-header {
+            background: #1e3a8a;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .btn-web {
+            background: #059669;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-web:hover { background: #047857; }
+        .btn-logout {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn-logout:hover { background: #b91c1c; }
+        .panel-content {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            background: #f8f9fa;
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid #dee2e6;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .btn-eliminar {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn-eliminar:hover { background: #b91c1c; }
+        .total {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            text-align: right;
+            font-weight: bold;
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+</head>
+<body>
+    <div id="loginContainer" class="login-container">
+        <div class="login-box">
+            <h1>Acceso Abogada</h1>
+            <div id="errorMessage" class="error"></div>
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Contraseña">
+            <button onclick="login()">Iniciar Sesión</button>
+        </div>
+    </div>
+
+    <div id="panelContainer" class="panel-container">
+        <div class="panel-header">
+            <h1>📋 Citas Agendadas</h1>
+            <div class="header-buttons">
+                <span id="userEmail" style="color: #e0f2fe;"></span>
+                <a href="/" class="btn-web">🌐 Ver Web</a>
+                <button onclick="logout()" class="btn-logout">Cerrar Sesión</button>
+            </div>
+        </div>
+        
+        <div class="panel-content">
+            <div id="citasTable"></div>
+            <div id="totalCitas" class="total"></div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDWW9yBXF3sEyAkXLdXQn5AIhRGuEMUIQ4",
+            authDomain: "legal-website-6035a.firebaseapp.com",
+            projectId: "legal-website-6035a",
+            storageBucket: "legal-website-6035a.firebasestorage.app",
+            messagingSenderId: "360533778063",
+            appId: "1:360533778063:web:298b723f3fbae696621afa"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        const loginContainer = document.getElementById('loginContainer');
+        const panelContainer = document.getElementById('panelContainer');
+        const errorMessage = document.getElementById('errorMessage');
+        const userEmailSpan = document.getElementById('userEmail');
+
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                loginContainer.style.display = 'none';
+                panelContainer.style.display = 'block';
+                userEmailSpan.textContent = user.email;
+                cargarCitas();
+            } else {
+                loginContainer.style.display = 'flex';
+                panelContainer.style.display = 'none';
+            }
+        });
+
+        window.login = function() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            errorMessage.style.display = 'none';
+            
+            auth.signInWithEmailAndPassword(email, password)
+                .catch((error) => {
+                    errorMessage.textContent = 'Email o contraseña incorrectos';
+                    errorMessage.style.display = 'block';
+                });
+        };
+
+        window.logout = function() {
+            auth.signOut();
+        };
+
+        function cargarCitas() {
+            db.collection('appointments').orderBy('fecha', 'desc').onSnapshot((snapshot) => {
+                let html = '<table><thead><tr><th>Fecha</th><th>Hora</th><th>Cliente</th><th>Email</th><th>Teléfono</th><th>Motivo</th><th>Acción</th></tr></thead><tbody>';
+                
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    html += `<tr>
+                        <td>${data.fecha || ''}</td>
+                        <td>${data.hora || ''}</td>
+                        <td>${data.nombre || ''}</td>
+                        <td>${data.email || ''}</td>
+                        <td>${data.telefono || ''}</td>
+                        <td>${data.motivo || ''}</td>
+                        <td><button class="btn-eliminar" onclick="eliminarCita('${doc.id}')">Eliminar</button></td>
+                    </tr>`;
+                });
+
+                html += '</tbody></table>';
+                document.getElementById('citasTable').innerHTML = html;
+                document.getElementById('totalCitas').textContent = `Total: ${snapshot.size} citas`;
+            });
+        }
+
+        window.eliminarCita = function(id) {
+            if (confirm('¿Eliminar esta cita?')) {
+                db.collection('appointments').doc(id).delete();
+            }
+        };
+    </script>
+</body>
+</html>

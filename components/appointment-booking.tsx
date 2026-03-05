@@ -4,6 +4,8 @@ import { useState, useMemo } from "react"
 import { Calendar, Clock, User, Mail, Phone, FileText, CheckCircle, ArrowRight, ArrowLeft, Sparkles } from "lucide-react"
 import { format, addDays, isSameDay, isWeekend } from "date-fns"
 import { es } from "date-fns/locale"
+import { collection, addDoc } from "firebase/firestore"
+import { db } from "@/lib/firebase"
 
 const serviceTypes = [
   { id: "civil", label: "Derecho Civil", duration: "45 min", icon: "Scale" },
@@ -34,11 +36,11 @@ function generateAvailableDays() {
 
 function getSmartSuggestion(service: string): string {
   const suggestions: Record<string, string> = {
-    civil: "Para casos civiles, recomendamos la primera consulta por la manana para revisar documentacion con calma.",
-    penal: "Los casos penales requieren atencion urgente. Priorizamos horarios tempranos para actuar con rapidez.",
+    civil: "Para casos civiles, recomendamos la primera consulta por la mañana para revisar documentación con calma.",
+    penal: "Los casos penales requieren atención urgente. Priorizamos horarios tempranos para actuar con rapidez.",
     familiar: "Entendemos la sensibilidad de los casos familiares. Ofrecemos un ambiente privado y confidencial.",
-    mercantil: "Para consultas mercantiles, le sugerimos traer documentos de la empresa para una asesoria mas eficiente.",
-    laboral: "Reuna sus recibos de nomina y contrato laboral para aprovechar al maximo la consulta.",
+    mercantil: "Para consultas mercantiles, le sugerimos traer documentos de la empresa para una asesoría más eficiente.",
+    laboral: "Reúna sus recibos de nómina y contrato laboral para aprovechar al máximo la consulta.",
     consulta: "La primera consulta es gratuita. Evaluaremos su caso y le orientaremos sobre los pasos a seguir.",
   }
   return suggestions[service] || suggestions.consulta
@@ -51,6 +53,7 @@ export function AppointmentBooking() {
   const [selectedTime, setSelectedTime] = useState("")
   const [formData, setFormData] = useState({ name: "", email: "", phone: "", message: "" })
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   const availableDays = useMemo(() => generateAvailableDays(), [])
 
@@ -62,29 +65,62 @@ export function AppointmentBooking() {
     return busy
   }, [selectedDate])
 
-  const handleSubmit = () => {
-    setIsSubmitted(true)
+  const handleSubmit = async () => {
+    if (!selectedService || !selectedDate || !selectedTime || !formData.name || !formData.email || !formData.phone) {
+      alert("Por favor completa todos los campos")
+      return
+    }
+
+    setIsLoading(true)
+
+    try {
+      const appointmentData = {
+        nombre: formData.name,
+        email: formData.email,
+        telefono: formData.phone,
+        fecha: selectedDate.toISOString().split('T')[0],
+        hora: selectedTime,
+        motivo: formData.message || "Sin descripción",
+        servicio: serviceTypes.find(s => s.id === selectedService)?.label || selectedService,
+        estado: "confirmada",
+        fechaCreacion: new Date().toISOString(),
+      }
+
+      console.log("Guardando cita:", appointmentData)
+
+      const docRef = await addDoc(collection(db, "appointments"), appointmentData)
+      console.log("Cita guardada con ID:", docRef.id)
+
+      setIsSubmitted(true)
+    } catch (error) {
+      console.error("Error al guardar la cita:", error)
+      alert("Hubo un error al agendar la cita. Por favor intenta de nuevo.")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   if (isSubmitted) {
     return (
       <section id="agendar" className="bg-background py-24 lg:py-32">
         <div className="mx-auto max-w-2xl px-4 text-center sm:px-6">
-          <div className="rounded-2xl border border-gold/20 bg-card p-12 shadow-xl">
-            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gold/10">
-              <CheckCircle className="h-10 w-10 text-gold" />
+          <div className="rounded-2xl border-2 border-green-500 bg-green-50 p-12 shadow-2xl transform scale-105 transition-all duration-500">
+            <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-green-100">
+              <CheckCircle className="h-12 w-12 text-green-600" />
             </div>
-            <h3 className="font-[family-name:var(--font-playfair)] text-2xl font-bold text-foreground sm:text-3xl">
-              Cita Agendada Exitosamente
+            <h3 className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-green-800 sm:text-4xl">
+              ¡Cita Confirmada!
             </h3>
-            <p className="mt-4 font-[family-name:var(--font-inter)] text-muted-foreground">
+            <p className="mt-4 font-[family-name:var(--font-inter)] text-lg text-green-700">
               Hemos recibido tu solicitud para el{" "}
-              <span className="font-semibold text-foreground">
+              <span className="font-bold text-green-900">
                 {selectedDate && format(selectedDate, "EEEE d 'de' MMMM", { locale: es })}
               </span>{" "}
               a las{" "}
-              <span className="font-semibold text-foreground">{selectedTime} hrs</span>.
-              Te enviaremos un correo de confirmacion a {formData.email}.
+              <span className="font-bold text-green-900">{selectedTime} hrs</span>.
+            </p>
+            <p className="mt-2 font-[family-name:var(--font-inter)] text-green-600">
+              Te hemos enviado un correo de confirmación a <span className="font-bold">{formData.email}</span>.
             </p>
             <button
               onClick={() => {
@@ -95,7 +131,7 @@ export function AppointmentBooking() {
                 setSelectedTime("")
                 setFormData({ name: "", email: "", phone: "", message: "" })
               }}
-              className="mt-8 rounded-sm bg-navy px-8 py-3 font-[family-name:var(--font-inter)] text-sm font-semibold text-primary-foreground transition-all hover:bg-navy-light"
+              className="mt-8 rounded-lg bg-green-600 px-10 py-4 font-[family-name:var(--font-inter)] text-base font-semibold text-white transition-all hover:bg-green-700 hover:shadow-lg hover:shadow-green-200"
             >
               Agendar Otra Cita
             </button>
@@ -116,7 +152,7 @@ export function AppointmentBooking() {
             Agenda tu Consulta
           </h2>
           <p className="mt-4 font-[family-name:var(--font-inter)] text-base text-muted-foreground">
-            Nuestro sistema inteligente te guia paso a paso para encontrar el mejor horario disponible.
+            Nuestro sistema inteligente te guía paso a paso para encontrar el mejor horario disponible.
           </p>
         </div>
 
@@ -184,7 +220,7 @@ export function AppointmentBooking() {
                         {service.label}
                       </div>
                       <div className="font-[family-name:var(--font-inter)] text-xs text-muted-foreground">
-                        Duracion: {service.duration}
+                        Duración: {service.duration}
                       </div>
                     </div>
                   </button>
@@ -220,7 +256,7 @@ export function AppointmentBooking() {
                 Selecciona una fecha
               </h3>
               <p className="mt-2 font-[family-name:var(--font-inter)] text-sm text-muted-foreground">
-                Mostrando los proximos dias habiles disponibles
+                Mostrando los próximos días hábiles disponibles
               </p>
               <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                 {availableDays.map((day) => (
@@ -251,7 +287,7 @@ export function AppointmentBooking() {
                   className="inline-flex items-center gap-2 rounded-sm border border-border px-6 py-3 font-[family-name:var(--font-inter)] text-sm font-medium text-foreground transition-all hover:bg-secondary"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  Atras
+                  Atrás
                 </button>
                 <button
                   onClick={() => setStep(3)}
@@ -317,7 +353,7 @@ export function AppointmentBooking() {
                   className="inline-flex items-center gap-2 rounded-sm border border-border px-6 py-3 font-[family-name:var(--font-inter)] text-sm font-medium text-foreground transition-all hover:bg-secondary"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  Atras
+                  Atrás
                 </button>
                 <button
                   onClick={() => setStep(4)}
@@ -372,7 +408,7 @@ export function AppointmentBooking() {
                 <div>
                   <label className="mb-1.5 flex items-center gap-2 font-[family-name:var(--font-inter)] text-sm font-medium text-foreground">
                     <Mail className="h-4 w-4 text-muted-foreground" />
-                    Correo Electronico
+                    Correo Electrónico
                   </label>
                   <input
                     type="email"
@@ -385,27 +421,26 @@ export function AppointmentBooking() {
                 <div>
                   <label className="mb-1.5 flex items-center gap-2 font-[family-name:var(--font-inter)] text-sm font-medium text-foreground">
                     <Phone className="h-4 w-4 text-muted-foreground" />
-                    Telefono
+                    Teléfono
                   </label>
                   <input
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     className="w-full rounded-lg border border-border bg-background px-4 py-3 font-[family-name:var(--font-inter)] text-sm text-foreground outline-none transition-colors focus:border-gold focus:ring-1 focus:ring-gold/30"
-                    placeholder="+52 000 000 0000"
+                    placeholder="+34 604 173 477"
                   />
                 </div>
                 <div>
                   <label className="mb-1.5 flex items-center gap-2 font-[family-name:var(--font-inter)] text-sm font-medium text-foreground">
                     <FileText className="h-4 w-4 text-muted-foreground" />
-                    Breve Descripcion del Caso
+                    Breve Descripción del Caso
                   </label>
-                  <input
-                    type="text"
+                  <textarea
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    className="w-full rounded-lg border border-border bg-background px-4 py-3 font-[family-name:var(--font-inter)] text-sm text-foreground outline-none transition-colors focus:border-gold focus:ring-1 focus:ring-gold/30"
-                    placeholder="Describe brevemente tu situacion"
+                    className="w-full rounded-lg border border-border bg-background px-4 py-3 font-[family-name:var(--font-inter)] text-sm text-foreground outline-none transition-colors focus:border-gold focus:ring-1 focus:ring-gold/30 min-h-[80px]"
+                    placeholder="Describe brevemente tu situación"
                   />
                 </div>
               </div>
@@ -416,15 +451,21 @@ export function AppointmentBooking() {
                   className="inline-flex items-center gap-2 rounded-sm border border-border px-6 py-3 font-[family-name:var(--font-inter)] text-sm font-medium text-foreground transition-all hover:bg-secondary"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  Atras
+                  Atrás
                 </button>
                 <button
                   onClick={handleSubmit}
-                  disabled={!formData.name || !formData.email || !formData.phone}
+                  disabled={!formData.name || !formData.email || !formData.phone || isLoading}
                   className="inline-flex items-center gap-2 rounded-sm bg-gold px-10 py-3 font-[family-name:var(--font-inter)] text-sm font-bold text-navy transition-all hover:bg-gold/90 hover:shadow-lg hover:shadow-gold/20 disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  Confirmar Cita
-                  <CheckCircle className="h-4 w-4" />
+                  {isLoading ? (
+                    <>Guardando...</>
+                  ) : (
+                    <>
+                      Confirmar Cita
+                      <CheckCircle className="h-4 w-4" />
+                    </>
+                  )}
                 </button>
               </div>
             </div>

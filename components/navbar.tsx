@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Menu, X, Scale } from "lucide-react"
+import { Menu, X, Scale } from "lucide-react"  // Scale es el icono de balanza (abogado)
 
 const navLinks = [
   { label: "Inicio", href: "#inicio" },
@@ -34,6 +34,7 @@ export default function Navbar() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
           <a href="#inicio" className="flex items-center gap-3">
+            {/* Scale es el icono de balanza - símbolo de abogado */}
             <Scale className="h-8 w-8 text-gold" />
             <div className="flex flex-col">
               <span className="font-[family-name:var(--font-playfair)] text-lg font-bold tracking-wide text-primary-foreground">

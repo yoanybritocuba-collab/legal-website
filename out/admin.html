@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Abogada</title>
+    <title>Panel Loida Azules</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f3f4f6; }
@@ -141,7 +141,7 @@
 <body>
     <div id="loginContainer" class="login-container">
         <div class="login-box">
-            <h1>Acceso Abogada</h1>
+            <h1>Panel Loida Azules</h1>
             <div id="errorMessage" class="error"></div>
             <input type="email" id="email" placeholder="Email">
             <input type="password" id="password" placeholder="Contraseña">
@@ -184,7 +184,6 @@
         const errorMessage = document.getElementById('errorMessage');
         const userEmailSpan = document.getElementById('userEmail');
 
-        // Forzar limpieza de campos al cargar
         document.getElementById('email').value = '';
         document.getElementById('password').value = '';
 
@@ -197,7 +196,6 @@
             } else {
                 loginContainer.style.display = 'flex';
                 panelContainer.style.display = 'none';
-                // Limpiar campos al salir
                 document.getElementById('email').value = '';
                 document.getElementById('password').value = '';
             }

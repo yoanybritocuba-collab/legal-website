@@ -153,11 +153,11 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Botón volver arriba */
+/* Botón volver arriba - AHORA A LA IZQUIERDA */
 .back-to-top {
   position: fixed;
   bottom: 30px;
-  left: 30px;
+  left: 30px;  /* CAMBIADO DE right A left */
   background: #1e3a8a;
   color: white;
   width: 50px;

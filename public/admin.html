@@ -184,9 +184,11 @@
         const errorMessage = document.getElementById('errorMessage');
         const userEmailSpan = document.getElementById('userEmail');
 
+        // Limpiar campos al cargar
         document.getElementById('email').value = '';
         document.getElementById('password').value = '';
 
+        // Verificar sesión
         auth.onAuthStateChanged((user) => {
             if (user) {
                 loginContainer.style.display = 'none';
@@ -196,6 +198,7 @@
             } else {
                 loginContainer.style.display = 'flex';
                 panelContainer.style.display = 'none';
+                // Limpiar campos al cerrar sesión
                 document.getElementById('email').value = '';
                 document.getElementById('password').value = '';
             }
@@ -246,6 +249,11 @@
                 db.collection('appointments').doc(id).delete();
             }
         };
+
+        // IMPORTANTE: Cerrar sesión cuando se cierra la pestaña
+        window.addEventListener('beforeunload', function() {
+            auth.signOut();
+        });
     </script>
 </body>
 </html>

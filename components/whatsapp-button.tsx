@@ -44,8 +44,9 @@ export function WhatsAppButton() {
     );
 
     if (isMobile) {
-      // Para móvil: intenta abrir la app nativa
-      return `whatsapp://send?phone=${phoneNumber}&text=${message}`;
+      // Para móvil: usa el esquema que fuerza la app NORMAL
+      // Primero intenta con WhatsApp normal, si no está, usa el navegador
+      return `intent://send?phone=${phoneNumber}&text=${message}#Intent;scheme=whatsapp;package=com.whatsapp;end`;
     } else {
       // Para escritorio: usa WhatsApp Web
       return `https://wa.me/${phoneNumber}?text=${message}`;
@@ -53,6 +54,30 @@ export function WhatsAppButton() {
   };
 
   const whatsappUrl = getWhatsAppUrl();
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (!isWorkingHours) {
+      e.preventDefault();
+      alert('Horario de atención: Lunes a Viernes 9:00-14:00 y 16:00-19:00');
+      return;
+    }
+
+    // Para móvil, usamos un truco adicional
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
+
+    if (isMobile) {
+      e.preventDefault();
+      // Intenta abrir WhatsApp normal
+      window.location.href = `whatsapp://send?phone=${phoneNumber}&text=${message}`;
+      
+      // Si no funciona, redirige a la web después de 1 segundo
+      setTimeout(() => {
+        window.location.href = `https://wa.me/${phoneNumber}?text=${message}`;
+      }, 1000);
+    }
+  };
 
   if (!isWorkingHours) {
     return (
@@ -80,14 +105,13 @@ export function WhatsAppButton() {
             💬 ¿Necesitas ayuda?
           </div>
         )}
-        <a
-          href={whatsappUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-lg transition-all duration-300 hover:scale-110 flex items-center justify-center"
+        <button
+          onClick={handleClick}
+          className="bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-lg transition-all duration-300 hover:scale-110 flex items-center justify-center cursor-pointer"
+          aria-label="Contactar por WhatsApp"
         >
           <MessageCircle size={24} />
-        </a>
+        </button>
       </div>
     </div>
   );

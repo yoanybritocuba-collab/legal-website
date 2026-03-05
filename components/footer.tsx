@@ -1,5 +1,4 @@
 import { Scale, MapPin, Phone, Mail, Clock } from "lucide-react"
-import Link from "next/link"
 
 export function Footer() {
   return (
@@ -20,11 +19,11 @@ export function Footer() {
               </div>
             </div>
             <p className="mt-4 font-[family-name:var(--font-inter)] text-sm text-gray-300">
-              Justicia y excelencia legal a tu servicio. Más de 15 años defendiendo tus derechos con dedicación y profesionalismo.
+              Justicia y excelencia legal a tu servicio. Más de 15 años defendiendo tus derechos.
             </p>
           </div>
 
-          {/* Columna 2: Contacto - TODOS EJECUTABLES */}
+          {/* Columna 2: Contacto (TODOS EJECUTABLES) */}
           <div>
             <h3 className="font-[family-name:var(--font-playfair)] text-lg font-bold text-gold mb-4">
               Contacto
@@ -33,7 +32,7 @@ export function Footer() {
               <li className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 text-gold shrink-0 mt-0.5" />
                 <a 
-                  href="https://maps.google.com/?q=C/Bailén 92 Entlo. 3a esc. izqda, 08009 Barcelona"
+                  href="https://maps.google.com/?q=C/Bailén+92+Entlo.+3a+esc.+izqda,+08009+Barcelona"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-gold transition-colors"
@@ -43,20 +42,26 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="h-5 w-5 text-gold shrink-0" />
-                <a href="tel:+34604173477" className="hover:text-gold transition-colors">
+                <a 
+                  href="tel:+34604173477" 
+                  className="hover:text-gold transition-colors"
+                >
                   +34 604 173 477
                 </a>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="h-5 w-5 text-gold shrink-0" />
-                <a href="mailto:loyanzules@icab.cat" className="hover:text-gold transition-colors break-all">
+                <a 
+                  href="mailto:loyanzules@icab.cat" 
+                  className="hover:text-gold transition-colors break-all"
+                >
                   loyanzules@icab.cat
                 </a>
               </li>
             </ul>
           </div>
 
-          {/* Columna 3: Horario - SOLO LUNES A VIERNES */}
+          {/* Columna 3: Horario */}
           <div>
             <h3 className="font-[family-name:var(--font-playfair)] text-lg font-bold text-gold mb-4">
               Horario
@@ -72,7 +77,7 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Columna 4: Enlaces rápidos */}
+          {/* Columna 4: Enlaces */}
           <div>
             <h3 className="font-[family-name:var(--font-playfair)] text-lg font-bold text-gold mb-4">
               Enlaces
@@ -88,14 +93,6 @@ export function Footer() {
                   </a>
                 </li>
               ))}
-              <li className="mt-4">
-                <a
-                  href="/admin.html"
-                  className="text-gray-300 hover:text-gold transition-colors text-xs"
-                >
-                  Acceso privado
-                </a>
-              </li>
             </ul>
           </div>
         </div>
@@ -115,13 +112,10 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Copyright y colegiatura */}
+        {/* Copyright */}
         <div className="mt-12 pt-8 border-t border-white/10 text-center font-[family-name:var(--font-inter)] text-sm text-gray-400">
           <p>© {new Date().getFullYear()} Loida Azules Suárez. Todos los derechos reservados.</p>
           <p className="mt-2 text-xs">Ilustre Colegio de la Abogacía de Barcelona - ICAB</p>
-          <p className="mt-1 text-xs text-gray-500">
-            C/ Bailén 92 Entlo. 3a esc. izqda · 08009 Barcelona · Tel. <a href="tel:+34604173477" className="hover:text-gold">+34 604 173 477</a>
-          </p>
         </div>
       </div>
     </footer>

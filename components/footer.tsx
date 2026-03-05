@@ -2,13 +2,15 @@ import { Scale, MapPin, Phone, Mail, Clock } from "lucide-react"
 
 export function Footer() {
   return (
-    <footer className="bg-navy text-white">
+    <footer id="contacto" className="bg-navy text-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-4">
           {/* Columna 1: Logo y descripción */}
           <div>
             <div className="flex items-center gap-3">
-              <Scale className="h-8 w-8 text-gold" />
+              <div className="bg-gold/20 p-2 rounded-full">
+                <Scale className="h-6 w-6 text-gold" />
+              </div>
               <div className="flex flex-col">
                 <span className="font-[family-name:var(--font-playfair)] text-lg font-bold">
                   LOIDA AZULES
@@ -19,11 +21,11 @@ export function Footer() {
               </div>
             </div>
             <p className="mt-4 font-[family-name:var(--font-inter)] text-sm text-gray-300">
-              Justicia y excelencia legal a tu servicio. Más de 15 años defendiendo tus derechos.
+              Justicia y excelencia legal a tu servicio. Más de 15 años defendiendo tus derechos con dedicación y profesionalismo.
             </p>
           </div>
 
-          {/* Columna 2: Contacto (TODOS EJECUTABLES) */}
+          {/* Columna 2: Contacto */}
           <div>
             <h3 className="font-[family-name:var(--font-playfair)] text-lg font-bold text-gold mb-4">
               Contacto

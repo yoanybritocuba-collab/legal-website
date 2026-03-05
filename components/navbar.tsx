@@ -1,12 +1,12 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Menu, X, Scale } from "lucide-react"  // Scale es el icono de balanza (abogado)
+import { Menu, X, Scale } from "lucide-react"
 
 const navLinks = [
   { label: "Inicio", href: "#inicio" },
   { label: "Servicios", href: "#servicios" },
-  { label: "Sobre Mi", href: "#sobre-mi" },
+  { label: "Sobre Mí", href: "#sobre-mi" },
   { label: "Testimonios", href: "#testimonios" },
   { label: "Contacto", href: "#contacto" },
 ]
@@ -23,6 +23,14 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
+  const handleContactClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    const footer = document.querySelector('footer');
+    if (footer) {
+      footer.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
@@ -34,8 +42,9 @@ export default function Navbar() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
           <a href="#inicio" className="flex items-center gap-3">
-            {/* Scale es el icono de balanza - símbolo de abogado */}
-            <Scale className="h-8 w-8 text-gold" />
+            <div className="bg-gold/20 p-3 rounded-full">
+              <Scale className="h-8 w-8 text-gold" />
+            </div>
             <div className="flex flex-col">
               <span className="font-[family-name:var(--font-playfair)] text-lg font-bold tracking-wide text-primary-foreground">
                 LOIDA AZULES
@@ -51,6 +60,7 @@ export default function Navbar() {
               <a
                 key={link.href}
                 href={link.href}
+                onClick={link.label === "Contacto" ? handleContactClick : undefined}
                 className="font-[family-name:var(--font-inter)] text-sm font-medium text-primary-foreground/80 transition-colors duration-300 hover:text-gold"
               >
                 {link.label}
@@ -59,14 +69,14 @@ export default function Navbar() {
 
             <a
               href="/admin.html"
-              className="font-[family-name:var(--font-inter)] text-sm font-medium text-primary-foreground/80 transition-colors duration-300 hover:text-gold"
+              className="px-4 py-2 border-2 border-gold text-gold rounded-sm hover:bg-gold hover:text-navy transition-all duration-300 font-[family-name:var(--font-inter)] text-sm font-medium"
             >
               Admin
             </a>
 
             <a
               href="#agendar"
-              className="rounded-sm bg-gold px-6 py-2.5 font-[family-name:var(--font-inter)] text-sm font-semibold text-navy transition-all duration-300 hover:bg-gold/90 hover:shadow-lg"
+              className="rounded-sm bg-gold px-6 py-2.5 font-[family-name:var(--font-inter)] text-sm font-semibold text-navy transition-all duration-300 hover:bg-gold/90 hover:shadow-lg hover:shadow-gold/20 hover-lift"
             >
               Agendar Cita
             </a>
@@ -89,7 +99,14 @@ export default function Navbar() {
               <a
                 key={link.href}
                 href={link.href}
-                onClick={() => setIsOpen(false)}
+                onClick={(e) => {
+                  setIsOpen(false);
+                  if (link.label === "Contacto") {
+                    e.preventDefault();
+                    const footer = document.querySelector('footer');
+                    if (footer) footer.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
                 className="rounded-sm px-4 py-3 font-[family-name:var(--font-inter)] text-sm text-primary-foreground/80 transition-colors hover:bg-primary-foreground/5 hover:text-gold"
               >
                 {link.label}
@@ -107,7 +124,7 @@ export default function Navbar() {
             <a
               href="#agendar"
               onClick={() => setIsOpen(false)}
-              className="mt-3 rounded-sm bg-gold px-6 py-3 text-center font-[family-name:var(--font-inter)] text-sm font-semibold text-navy"
+              className="mt-3 rounded-sm bg-gold px-6 py-3 text-center font-[family-name:var(--font-inter)] text-sm font-semibold text-navy hover-lift"
             >
               Agendar Cita
             </a>

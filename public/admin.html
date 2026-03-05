@@ -143,8 +143,8 @@
         <div class="login-box">
             <h1>Acceso Abogada</h1>
             <div id="errorMessage" class="error"></div>
-            <input type="email" id="email" placeholder="Email">
-            <input type="password" id="password" placeholder="Contraseña">
+            <input type="email" id="email" placeholder="Email" autocomplete="off">
+            <input type="password" id="password" placeholder="Contraseña" autocomplete="off">
             <button onclick="login()">Iniciar Sesión</button>
         </div>
     </div>
@@ -184,6 +184,10 @@
         const errorMessage = document.getElementById('errorMessage');
         const userEmailSpan = document.getElementById('userEmail');
 
+        // Forzar limpieza de campos al cargar la página de login
+        document.getElementById('email').value = '';
+        document.getElementById('password').value = '';
+
         auth.onAuthStateChanged((user) => {
             if (user) {
                 loginContainer.style.display = 'none';
@@ -193,6 +197,9 @@
             } else {
                 loginContainer.style.display = 'flex';
                 panelContainer.style.display = 'none';
+                // Limpiar campos al salir
+                document.getElementById('email').value = '';
+                document.getElementById('password').value = '';
             }
         });
 

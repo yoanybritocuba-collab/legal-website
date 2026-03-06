@@ -34,6 +34,13 @@ function generateAvailableDays() {
   return days
 }
 
+// Función para generar token directamente (sin API)
+const generateToken = (): string => {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
 export function AppointmentBooking() {
   const [step, setStep] = useState(1)
   const [selectedService, setSelectedService] = useState("")
@@ -42,7 +49,6 @@ export function AppointmentBooking() {
   const [formData, setFormData] = useState({ name: "", email: "", phone: "", message: "" })
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [appointmentId, setAppointmentId] = useState("")
 
   const availableDays = useMemo(() => generateAvailableDays(), [])
 
@@ -54,25 +60,6 @@ export function AppointmentBooking() {
     return busy
   }, [selectedDate])
 
-  const generateToken = async (appointmentId: string, email: string) => {
-    try {
-      const response = await fetch('/api/generate-token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ appointmentId, email })
-      });
-      
-      const data = await response.json();
-      if (data.success) {
-        return data.token;
-      }
-      return null;
-    } catch (error) {
-      console.error('Error generando token:', error);
-      return null;
-    }
-  };
-
   const handleSubmit = async () => {
     if (!selectedService || !selectedDate || !selectedTime || !formData.name || !formData.email || !formData.phone) {
       alert("Por favor completa todos los campos")
@@ -82,7 +69,12 @@ export function AppointmentBooking() {
     setIsLoading(true)
 
     try {
-      // 1. Guardar la cita básica
+      // 1. Generar token directamente (sin API)
+      const token = generateToken()
+      const expiresAt = new Date()
+      expiresAt.setDate(expiresAt.getDate() + 7) // Válido por 7 días
+
+      // 2. Guardar la cita con el token
       const appointmentData = {
         nombre: formData.name,
         email: formData.email,
@@ -93,52 +85,65 @@ export function AppointmentBooking() {
         servicio: serviceTypes.find(s => s.id === selectedService)?.label || selectedService,
         estado: "confirmada",
         fechaCreacion: new Date().toISOString(),
-      }
-
-      const docRef = await addDoc(collection(db, "appointments"), appointmentData)
-      setAppointmentId(docRef.id)
-
-      // 2. Generar token de edición
-      const token = await generateToken(docRef.id, formData.email);
-      
-      // 3. Actualizar el documento con el token
-      await updateDoc(doc(db, "appointments", docRef.id), {
         editToken: token,
-        tokenExpires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 7 días
-      });
-
-      // 4. URL de edición
-      const editUrl = `https://legal-website-6035a.web.app/editar-cita/${docRef.id}?token=${token}`;
-
-      // 5. Actualizar con los campos de correo
-      await updateDoc(doc(db, "appointments", docRef.id), {
+        tokenExpires: expiresAt.toISOString(),
         to: [formData.email],
         message: {
           subject: "Confirmación de cita - Loida Azules",
           html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-              <h2 style="color: #0A1A2F;">¡Cita Confirmada!</h2>
-              <p>Hola <strong>${formData.name}</strong>,</p>
-              <p>Tu cita ha sido agendada exitosamente:</p>
-              <div style="background-color: #F5F7FA; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                <p><strong>Fecha:</strong> ${selectedDate?.toLocaleDateString()}</p>
-                <p><strong>Hora:</strong> ${selectedTime} hrs</p>
-                <p><strong>Servicio:</strong> ${serviceTypes.find(s => s.id === selectedService)?.label}</p>
-                <p><strong>Motivo:</strong> ${formData.message || "No especificado"}</p>
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f8fafc; padding: 30px; border-radius: 10px;">
+              <div style="background: #0A1A2F; color: white; padding: 20px; border-radius: 8px 8px 0 0; text-align: center;">
+                <h1 style="margin: 0; font-family: Georgia, serif;">Loida Azules</h1>
+                <p style="margin: 5px 0 0; color: #B89B5E;">Abogada</p>
               </div>
-              <p>¿Necesitas modificar tu cita?</p>
-              <p>
-                <a href="${editUrl}" 
-                   style="background-color: #722F37; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                  Editar mi cita
-                </a>
-              </p>
-              <p style="margin-top: 30px; font-size: 12px; color: #7F8C8D;">
-                Este enlace es válido por 7 días. Si no puedes asistir, por favor cancela con anticipación.
-              </p>
+              
+              <div style="background: white; padding: 30px; border-radius: 0 0 8px 8px;">
+                <h2 style="color: #0A1A2F; border-bottom: 2px solid #722F37; padding-bottom: 10px;">¡Cita Confirmada!</h2>
+                
+                <p>Hola <strong>${formData.name}</strong>,</p>
+                <p>Tu cita ha sido agendada exitosamente:</p>
+                
+                <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #722F37;">
+                  <p><strong>📅 Fecha:</strong> ${selectedDate.toLocaleDateString()}</p>
+                  <p><strong>⏰ Hora:</strong> ${selectedTime} hrs</p>
+                  <p><strong>⚖️ Servicio:</strong> ${serviceTypes.find(s => s.id === selectedService)?.label}</p>
+                  <p><strong>📝 Motivo:</strong> ${formData.message || "No especificado"}</p>
+                </div>
+                
+                <div style="background: #fff3e0; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
+                  <p style="margin-bottom: 15px;"><strong>🔗 Enlace para editar tu cita:</strong></p>
+                  <a href="https://legal-website-6035a.web.app/editar-cita/ID_CITA?token=${token}" 
+                     style="background: #722F37; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                    Editar mi cita
+                  </a>
+                  <p style="margin-top: 10px; font-size: 12px; color: #666;">Este enlace es válido por 7 días</p>
+                </div>
+                
+                <p style="color: #666; font-size: 14px; margin-top: 30px;">
+                  Si no puedes asistir, por favor cancela con anticipación.
+                </p>
+              </div>
+              
+              <div style="text-align: center; margin-top: 20px; font-size: 12px; color: #999;">
+                <p>© ${new Date().getFullYear()} Loida Azules Suárez - ICAB</p>
+              </div>
             </div>
           `
         }
+      }
+
+      // Guardar en Firestore
+      const docRef = await addDoc(collection(db, "appointments"), appointmentData)
+      console.log("Cita guardada con ID:", docRef.id)
+
+      // 3. Reemplazar ID_CITA en el mensaje con el ID real
+      const updatedMessage = appointmentData.message.html.replace(
+        'ID_CITA',
+        docRef.id
+      )
+
+      await updateDoc(doc(db, "appointments", docRef.id), {
+        "message.html": updatedMessage
       })
 
       setIsSubmitted(true)
@@ -183,6 +188,7 @@ export function AppointmentBooking() {
     )
   }
 
+  // Resto del código del formulario...
   return (
     <section id="agendar" className="bg-stone py-24 lg:py-32">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
@@ -198,7 +204,7 @@ export function AppointmentBooking() {
           </p>
         </div>
 
-        {/* Progress Steps - mantener igual que antes */}
+        {/* Progress Steps */}
         <div className="mx-auto mt-12 flex max-w-md items-center justify-between">
           {[1, 2, 3, 4].map((s) => (
             <div key={s} className="flex items-center">
@@ -232,10 +238,10 @@ export function AppointmentBooking() {
           ))}
         </div>
 
-        {/* Steps - mantener el mismo JSX que tenías antes */}
+        {/* Aquí continúa tu código existente de los steps... */}
+        {/* Como ya lo tienes funcionando, mantén tu código original */}
         <div className="mt-10 rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-10">
-          {/* Aquí va el mismo código de los steps que ya tenías funcionando */}
-          {/* Por brevedad no lo repito, pero mantén tu código existente */}
+          {/* ... tu código de los pasos ... */}
         </div>
       </div>
     </section>

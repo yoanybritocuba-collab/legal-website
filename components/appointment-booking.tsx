@@ -8,12 +8,12 @@ import { collection, addDoc, updateDoc, doc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 
 const serviceTypes = [
-  { id: "civil", label: "Derecho Civil", duration: "45 min" },
-  { id: "penal", label: "Derecho Penal", duration: "60 min" },
-  { id: "familiar", label: "Derecho Familiar", duration: "45 min" },
-  { id: "mercantil", label: "Derecho Mercantil", duration: "45 min" },
-  { id: "laboral", label: "Derecho Laboral", duration: "45 min" },
-  { id: "consulta", label: "Consulta General", duration: "30 min" },
+  { id: "civil", label: "Derecho Civil", duration: "45 min", icon: "Scale" },
+  { id: "penal", label: "Derecho Penal", duration: "60 min", icon: "Gavel" },
+  { id: "familiar", label: "Derecho Familiar", duration: "45 min", icon: "Users" },
+  { id: "mercantil", label: "Derecho Mercantil", duration: "45 min", icon: "Building2" },
+  { id: "laboral", label: "Derecho Laboral", duration: "45 min", icon: "FileText" },
+  { id: "consulta", label: "Consulta General", duration: "30 min", icon: "ShieldCheck" },
 ]
 
 const timeSlots = [
@@ -34,7 +34,19 @@ function generateAvailableDays() {
   return days
 }
 
-// Función para generar token directamente (sin API)
+function getSmartSuggestion(service: string): string {
+  const suggestions: Record<string, string> = {
+    civil: "Para casos civiles, recomendamos la primera consulta por la mañana para revisar documentación con calma.",
+    penal: "Los casos penales requieren atención urgente. Priorizamos horarios tempranos para actuar con rapidez.",
+    familiar: "Entendemos la sensibilidad de los casos familiares. Ofrecemos un ambiente privado y confidencial.",
+    mercantil: "Para consultas mercantiles, le sugerimos traer documentos de la empresa para una asesoría más eficiente.",
+    laboral: "Reúna sus recibos de nómina y contrato laboral para aprovechar al máximo la consulta.",
+    consulta: "La primera consulta es gratuita. Evaluaremos su caso y le orientaremos sobre los pasos a seguir.",
+  }
+  return suggestions[service] || suggestions.consulta
+}
+
+// Función para generar token
 const generateToken = (): string => {
   const array = new Uint8Array(32);
   crypto.getRandomValues(array);
@@ -69,12 +81,12 @@ export function AppointmentBooking() {
     setIsLoading(true)
 
     try {
-      // 1. Generar token directamente (sin API)
+      // Generar token
       const token = generateToken()
       const expiresAt = new Date()
-      expiresAt.setDate(expiresAt.getDate() + 7) // Válido por 7 días
+      expiresAt.setDate(expiresAt.getDate() + 7)
 
-      // 2. Guardar la cita con el token
+      // Datos de la cita
       const appointmentData = {
         nombre: formData.name,
         email: formData.email,
@@ -132,16 +144,10 @@ export function AppointmentBooking() {
         }
       }
 
-      // Guardar en Firestore
       const docRef = await addDoc(collection(db, "appointments"), appointmentData)
-      console.log("Cita guardada con ID:", docRef.id)
 
-      // 3. Reemplazar ID_CITA en el mensaje con el ID real
-      const updatedMessage = appointmentData.message.html.replace(
-        'ID_CITA',
-        docRef.id
-      )
-
+      // Reemplazar ID_CITA con el ID real
+      const updatedMessage = appointmentData.message.html.replace('ID_CITA', docRef.id)
       await updateDoc(doc(db, "appointments", docRef.id), {
         "message.html": updatedMessage
       })
@@ -188,7 +194,6 @@ export function AppointmentBooking() {
     )
   }
 
-  // Resto del código del formulario...
   return (
     <section id="agendar" className="bg-stone py-24 lg:py-32">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
@@ -238,10 +243,287 @@ export function AppointmentBooking() {
           ))}
         </div>
 
-        {/* Aquí continúa tu código existente de los steps... */}
-        {/* Como ya lo tienes funcionando, mantén tu código original */}
         <div className="mt-10 rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-10">
-          {/* ... tu código de los pasos ... */}
+          {/* Step 1: Select Service */}
+          {step === 1 && (
+            <div>
+              <h3 className="font-[family-name:var(--font-playfair)] text-xl font-bold text-navy-deep">
+                Selecciona el tipo de consulta
+              </h3>
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                {serviceTypes.map((service) => (
+                  <button
+                    key={service.id}
+                    onClick={() => setSelectedService(service.id)}
+                    className={`flex items-center gap-4 rounded-lg border p-4 text-left transition-all duration-300 ${
+                      selectedService === service.id
+                        ? "border-gold-classic bg-gold-classic/5 shadow-md"
+                        : "border-border hover:border-gold-classic/30 hover:bg-stone"
+                    }`}
+                  >
+                    <div
+                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg transition-colors ${
+                        selectedService === service.id ? "bg-gold-classic/20" : "bg-stone"
+                      }`}
+                    >
+                      <FileText className={`h-5 w-5 ${selectedService === service.id ? "text-gold-classic" : "text-text-light"}`} />
+                    </div>
+                    <div>
+                      <div className="font-[family-name:var(--font-inter)] text-sm font-semibold text-navy-deep">
+                        {service.label}
+                      </div>
+                      <div className="font-[family-name:var(--font-inter)] text-xs text-text-light">
+                        Duración: {service.duration}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {selectedService && (
+                <div className="mt-6 flex items-start gap-3 rounded-lg border border-gold-classic/20 bg-gold-classic/5 p-4">
+                  <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-gold-classic" />
+                  <p className="font-[family-name:var(--font-inter)] text-sm leading-relaxed text-text-light">
+                    {getSmartSuggestion(selectedService)}
+                  </p>
+                </div>
+              )}
+
+              <div className="mt-8 flex justify-end">
+                <button
+                  onClick={() => setStep(2)}
+                  disabled={!selectedService}
+                  className="inline-flex items-center gap-2 rounded-sm bg-navy-deep px-8 py-3 font-[family-name:var(--font-inter)] text-sm font-semibold text-white transition-all hover:bg-burgundy disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Continuar
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 2: Select Date */}
+          {step === 2 && (
+            <div>
+              <h3 className="font-[family-name:var(--font-playfair)] text-xl font-bold text-navy-deep">
+                Selecciona una fecha
+              </h3>
+              <p className="mt-2 font-[family-name:var(--font-inter)] text-sm text-text-light">
+                Mostrando los próximos días hábiles disponibles
+              </p>
+              <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                {availableDays.map((day) => (
+                  <button
+                    key={day.toISOString()}
+                    onClick={() => setSelectedDate(day)}
+                    className={`flex flex-col items-center rounded-lg border p-4 transition-all duration-300 ${
+                      selectedDate && isSameDay(selectedDate, day)
+                        ? "border-gold-classic bg-gold-classic/5 shadow-md"
+                        : "border-border hover:border-gold-classic/30 hover:bg-stone"
+                    }`}
+                  >
+                    <span className="font-[family-name:var(--font-inter)] text-xs uppercase text-text-light">
+                      {format(day, "EEE", { locale: es })}
+                    </span>
+                    <span className="mt-1 font-[family-name:var(--font-playfair)] text-2xl font-bold text-navy-deep">
+                      {format(day, "d")}
+                    </span>
+                    <span className="font-[family-name:var(--font-inter)] text-xs text-text-light">
+                      {format(day, "MMM", { locale: es })}
+                    </span>
+                  </button>
+                ))}
+              </div>
+              <div className="mt-8 flex justify-between">
+                <button
+                  onClick={() => setStep(1)}
+                  className="inline-flex items-center gap-2 rounded-sm border border-border px-6 py-3 font-[family-name:var(--font-inter)] text-sm font-medium text-navy-deep transition-all hover:bg-stone"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Atrás
+                </button>
+                <button
+                  onClick={() => setStep(3)}
+                  disabled={!selectedDate}
+                  className="inline-flex items-center gap-2 rounded-sm bg-navy-deep px-8 py-3 font-[family-name:var(--font-inter)] text-sm font-semibold text-white transition-all hover:bg-burgundy disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Continuar
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Select Time */}
+          {step === 3 && (
+            <div>
+              <h3 className="font-[family-name:var(--font-playfair)] text-xl font-bold text-navy-deep">
+                Selecciona un horario
+              </h3>
+              <p className="mt-2 font-[family-name:var(--font-inter)] text-sm text-text-light">
+                {selectedDate && format(selectedDate, "EEEE d 'de' MMMM, yyyy", { locale: es })}
+              </p>
+
+              <div className="mt-6">
+                <div className="mb-3 flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <div className="h-3 w-3 rounded-full bg-gold-classic/20 ring-1 ring-gold-classic/40" />
+                    <span className="font-[family-name:var(--font-inter)] text-xs text-text-light">Disponible</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="h-3 w-3 rounded-full bg-border" />
+                    <span className="font-[family-name:var(--font-inter)] text-xs text-text-light">Ocupado</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3 sm:grid-cols-5">
+                  {timeSlots.map((time) => {
+                    const isBusy = simulatedBusy.has(time)
+                    return (
+                      <button
+                        key={time}
+                        onClick={() => !isBusy && setSelectedTime(time)}
+                        disabled={isBusy}
+                        className={`flex items-center justify-center gap-2 rounded-lg border p-3 font-[family-name:var(--font-inter)] text-sm transition-all duration-300 ${
+                          isBusy
+                            ? "cursor-not-allowed border-border bg-stone/50 text-text-light line-through opacity-50"
+                            : selectedTime === time
+                            ? "border-gold-classic bg-gold-classic/10 font-semibold text-navy-deep shadow-md"
+                            : "border-border text-navy-deep hover:border-gold-classic/30 hover:bg-stone"
+                        }`}
+                      >
+                        <Clock className="h-3.5 w-3.5" />
+                        {time}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div className="mt-8 flex justify-between">
+                <button
+                  onClick={() => setStep(2)}
+                  className="inline-flex items-center gap-2 rounded-sm border border-border px-6 py-3 font-[family-name:var(--font-inter)] text-sm font-medium text-navy-deep transition-all hover:bg-stone"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Atrás
+                </button>
+                <button
+                  onClick={() => setStep(4)}
+                  disabled={!selectedTime}
+                  className="inline-flex items-center gap-2 rounded-sm bg-navy-deep px-8 py-3 font-[family-name:var(--font-inter)] text-sm font-semibold text-white transition-all hover:bg-burgundy disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Continuar
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 4: Contact Details */}
+          {step === 4 && (
+            <div>
+              <h3 className="font-[family-name:var(--font-playfair)] text-xl font-bold text-navy-deep">
+                Completa tus datos
+              </h3>
+
+              <div className="mt-2 rounded-lg border border-gold-classic/20 bg-gold-classic/5 p-4">
+                <div className="flex flex-wrap gap-4 font-[family-name:var(--font-inter)] text-sm text-navy-deep">
+                  <span className="flex items-center gap-1.5">
+                    <Calendar className="h-4 w-4 text-gold-classic" />
+                    {selectedDate && format(selectedDate, "d MMM yyyy", { locale: es })}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="h-4 w-4 text-gold-classic" />
+                    {selectedTime} hrs
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <FileText className="h-4 w-4 text-gold-classic" />
+                    {serviceTypes.find((s) => s.id === selectedService)?.label}
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1.5 flex items-center gap-2 font-[family-name:var(--font-inter)] text-sm font-medium text-navy-deep">
+                    <User className="h-4 w-4 text-burgundy" />
+                    Nombre Completo
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full rounded-lg border border-border bg-white px-4 py-3 font-[family-name:var(--font-inter)] text-sm text-navy-deep outline-none transition-colors focus:border-gold-classic focus:ring-1 focus:ring-gold-classic/30"
+                    placeholder="Tu nombre"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 flex items-center gap-2 font-[family-name:var(--font-inter)] text-sm font-medium text-navy-deep">
+                    <Mail className="h-4 w-4 text-burgundy" />
+                    Correo Electrónico
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full rounded-lg border border-border bg-white px-4 py-3 font-[family-name:var(--font-inter)] text-sm text-navy-deep outline-none transition-colors focus:border-gold-classic focus:ring-1 focus:ring-gold-classic/30"
+                    placeholder="correo@ejemplo.com"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 flex items-center gap-2 font-[family-name:var(--font-inter)] text-sm font-medium text-navy-deep">
+                    <Phone className="h-4 w-4 text-burgundy" />
+                    Teléfono
+                  </label>
+                  <input
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    className="w-full rounded-lg border border-border bg-white px-4 py-3 font-[family-name:var(--font-inter)] text-sm text-navy-deep outline-none transition-colors focus:border-gold-classic focus:ring-1 focus:ring-gold-classic/30"
+                    placeholder="+34 604 173 477"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 flex items-center gap-2 font-[family-name:var(--font-inter)] text-sm font-medium text-navy-deep">
+                    <FileText className="h-4 w-4 text-burgundy" />
+                    Breve Descripción
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    className="w-full rounded-lg border border-border bg-white px-4 py-3 font-[family-name:var(--font-inter)] text-sm text-navy-deep outline-none transition-colors focus:border-gold-classic focus:ring-1 focus:ring-gold-classic/30"
+                    placeholder="Describe brevemente tu situación"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-8 flex justify-between">
+                <button
+                  onClick={() => setStep(3)}
+                  className="inline-flex items-center gap-2 rounded-sm border border-border px-6 py-3 font-[family-name:var(--font-inter)] text-sm font-medium text-navy-deep transition-all hover:bg-stone"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Atrás
+                </button>
+                <button
+                  onClick={handleSubmit}
+                  disabled={!formData.name || !formData.email || !formData.phone || isLoading}
+                  className="inline-flex items-center gap-2 rounded-sm bg-gold-classic px-10 py-3 font-[family-name:var(--font-inter)] text-sm font-bold text-navy-deep transition-all hover:bg-gold-classic/90 hover:shadow-lg hover:shadow-gold-classic/20 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  {isLoading ? (
+                    <>Guardando...</>
+                  ) : (
+                    <>
+                      Confirmar Cita
+                      <CheckCircle className="h-4 w-4" />
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </section>

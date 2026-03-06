@@ -80,23 +80,17 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Columna 4: Código QR */}
+          {/* Columna 4: Enlaces rápidos (vacía o con algo simple) */}
           <div>
             <h3 className="font-[family-name:var(--font-playfair)] text-lg font-bold text-gold-classic mb-4">
-              Escanea para contactar
+              Enlaces
             </h3>
-            <div className="bg-white p-4 rounded-lg inline-block">
-              <Image
-                src="/images/qr.jpeg"
-                alt="Código QR de contacto"
-                width={150}
-                height={150}
-                className="rounded-lg"
-              />
-            </div>
-            <p className="mt-3 font-[family-name:var(--font-inter)] text-xs text-gray-300">
-              Escanea con tu móvil para guardar el contacto
-            </p>
+            <ul className="space-y-2 font-[family-name:var(--font-inter)] text-sm">
+              <li><a href="#inicio" className="text-gray-300 hover:text-gold-classic">Inicio</a></li>
+              <li><a href="#servicios" className="text-gray-300 hover:text-gold-classic">Servicios</a></li>
+              <li><a href="#sobre-mi" className="text-gray-300 hover:text-gold-classic">Sobre Mí</a></li>
+              <li><a href="#testimonios" className="text-gray-300 hover:text-gold-classic">Testimonios</a></li>
+            </ul>
           </div>
         </div>
 
@@ -115,10 +109,31 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Copyright */}
-        <div className="mt-12 pt-8 border-t border-white/10 text-center font-[family-name:var(--font-inter)] text-sm text-gray-400">
-          <p>© {new Date().getFullYear()} Loida Azules Suárez. Todos los derechos reservados.</p>
-          <p className="mt-2 text-xs">Ilustre Colegio de la Abogacía de Barcelona - ICAB</p>
+        {/* Copyright con QR pequeño al lado */}
+        <div className="mt-12 pt-8 border-t border-white/10">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            {/* Texto de copyright */}
+            <div className="font-[family-name:var(--font-inter)] text-sm text-gray-400 text-center md:text-left">
+              <p>© {new Date().getFullYear()} Loida Azules Suárez. Todos los derechos reservados.</p>
+              <p className="mt-1 text-xs">Ilustre Colegio de la Abogacía de Barcelona - ICAB</p>
+            </div>
+            
+            {/* QR pequeño */}
+            <div className="flex items-center gap-3">
+              <div className="bg-white p-1 rounded">
+                <Image
+                  src="/images/qr.jpeg"
+                  alt="Código QR"
+                  width={50}
+                  height={50}
+                  className="rounded"
+                />
+              </div>
+              <span className="text-xs text-gray-400 max-w-[150px]">
+                Escanea para contacto
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </footer>

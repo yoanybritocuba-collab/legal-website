@@ -1,61 +1,62 @@
 import { Scale, MapPin, Phone, Mail, Clock } from "lucide-react"
+import Image from "next/image"
 
 export function Footer() {
   return (
-    <footer id="contacto" className="bg-navy text-white">
+    <footer id="contacto" className="bg-navy-deep text-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-4">
-          {/* Columna 1: Logo y descripción */}
+          {/* Columna 1: Logo */}
           <div>
             <div className="flex items-center gap-3">
-              <div className="bg-gold/20 p-2 rounded-full">
-                <Scale className="h-6 w-6 text-gold" />
+              <div className="bg-gold-classic/20 p-2 rounded-full">
+                <Scale className="h-6 w-6 text-gold-classic" />
               </div>
               <div className="flex flex-col">
-                <span className="font-[family-name:var(--font-playfair)] text-lg font-bold">
+                <span className="font-[family-name:var(--font-playfair)] text-lg font-bold text-white">
                   LOIDA AZULES
                 </span>
-                <span className="font-[family-name:var(--font-inter)] text-[10px] uppercase tracking-[0.3em] text-gold">
+                <span className="font-[family-name:var(--font-inter)] text-[10px] uppercase tracking-[0.3em] text-gold-classic">
                   Abogada
                 </span>
               </div>
             </div>
             <p className="mt-4 font-[family-name:var(--font-inter)] text-sm text-gray-300">
-              Justicia y excelencia legal a tu servicio. Más de 15 años defendiendo tus derechos con dedicación y profesionalismo.
+              Justicia y excelencia legal a tu servicio. Más de 15 años defendiendo tus derechos.
             </p>
           </div>
 
           {/* Columna 2: Contacto */}
           <div>
-            <h3 className="font-[family-name:var(--font-playfair)] text-lg font-bold text-gold mb-4">
+            <h3 className="font-[family-name:var(--font-playfair)] text-lg font-bold text-gold-classic mb-4">
               Contacto
             </h3>
             <ul className="space-y-3 font-[family-name:var(--font-inter)] text-sm text-gray-300">
               <li className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-gold shrink-0 mt-0.5" />
+                <MapPin className="h-5 w-5 text-gold-classic shrink-0 mt-0.5" />
                 <a 
                   href="https://maps.google.com/?q=C/Bailén+92+Entlo.+3a+esc.+izqda,+08009+Barcelona"
-                  target="_blank"
+                  target="_blank" 
                   rel="noopener noreferrer"
-                  className="hover:text-gold transition-colors"
+                  className="hover:text-gold-classic transition-colors"
                 >
                   C/ Bailén 92 Entlo. 3a esc. izqda<br />08009 Barcelona
                 </a>
               </li>
               <li className="flex items-center gap-3">
-                <Phone className="h-5 w-5 text-gold shrink-0" />
+                <Phone className="h-5 w-5 text-gold-classic shrink-0" />
                 <a 
                   href="tel:+34604173477" 
-                  className="hover:text-gold transition-colors"
+                  className="hover:text-gold-classic transition-colors"
                 >
                   +34 604 173 477
                 </a>
               </li>
               <li className="flex items-center gap-3">
-                <Mail className="h-5 w-5 text-gold shrink-0" />
+                <Mail className="h-5 w-5 text-gold-classic shrink-0" />
                 <a 
                   href="mailto:loyanzules@icab.cat" 
-                  className="hover:text-gold transition-colors break-all"
+                  className="hover:text-gold-classic transition-colors break-all"
                 >
                   loyanzules@icab.cat
                 </a>
@@ -65,12 +66,12 @@ export function Footer() {
 
           {/* Columna 3: Horario */}
           <div>
-            <h3 className="font-[family-name:var(--font-playfair)] text-lg font-bold text-gold mb-4">
+            <h3 className="font-[family-name:var(--font-playfair)] text-lg font-bold text-gold-classic mb-4">
               Horario
             </h3>
             <ul className="space-y-3 font-[family-name:var(--font-inter)] text-sm text-gray-300">
               <li className="flex items-start gap-3">
-                <Clock className="h-5 w-5 text-gold shrink-0 mt-0.5" />
+                <Clock className="h-5 w-5 text-gold-classic shrink-0 mt-0.5" />
                 <div>
                   <p>Lunes a Viernes: 9:00 - 14:00</p>
                   <p className="mt-1">16:00 - 19:00</p>
@@ -79,23 +80,23 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Columna 4: Enlaces */}
+          {/* Columna 4: Código QR */}
           <div>
-            <h3 className="font-[family-name:var(--font-playfair)] text-lg font-bold text-gold mb-4">
-              Enlaces
+            <h3 className="font-[family-name:var(--font-playfair)] text-lg font-bold text-gold-classic mb-4">
+              Escanea para contactar
             </h3>
-            <ul className="space-y-2 font-[family-name:var(--font-inter)] text-sm">
-              {["Inicio", "Servicios", "Sobre Mi", "Testimonios", "Contacto"].map((item) => (
-                <li key={item}>
-                  <a
-                    href={`#${item.toLowerCase().replace(" ", "-")}`}
-                    className="text-gray-300 hover:text-gold transition-colors"
-                  >
-                    {item}
-                  </a>
-                </li>
-              ))}
-            </ul>
+            <div className="bg-white p-4 rounded-lg inline-block">
+              <Image
+                src="/images/qr.jpeg"
+                alt="Código QR de contacto"
+                width={150}
+                height={150}
+                className="rounded-lg"
+              />
+            </div>
+            <p className="mt-3 font-[family-name:var(--font-inter)] text-xs text-gray-300">
+              Escanea con tu móvil para guardar el contacto
+            </p>
           </div>
         </div>
 

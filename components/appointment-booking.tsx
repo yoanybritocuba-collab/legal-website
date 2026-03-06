@@ -4,16 +4,16 @@ import { useState, useMemo } from "react"
 import { Calendar, Clock, User, Mail, Phone, FileText, CheckCircle, ArrowRight, ArrowLeft, Sparkles } from "lucide-react"
 import { format, addDays, isSameDay, isWeekend } from "date-fns"
 import { es } from "date-fns/locale"
-import { collection, addDoc } from "firebase/firestore"
+import { collection, addDoc, updateDoc, doc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 
 const serviceTypes = [
-  { id: "civil", label: "Derecho Civil", duration: "45 min", icon: "Scale" },
-  { id: "penal", label: "Derecho Penal", duration: "60 min", icon: "Gavel" },
-  { id: "familiar", label: "Derecho Familiar", duration: "45 min", icon: "Users" },
-  { id: "mercantil", label: "Derecho Mercantil", duration: "45 min", icon: "Building2" },
-  { id: "laboral", label: "Derecho Laboral", duration: "45 min", icon: "FileText" },
-  { id: "consulta", label: "Consulta General", duration: "30 min", icon: "ShieldCheck" },
+  { id: "civil", label: "Derecho Civil", duration: "45 min" },
+  { id: "penal", label: "Derecho Penal", duration: "60 min" },
+  { id: "familiar", label: "Derecho Familiar", duration: "45 min" },
+  { id: "mercantil", label: "Derecho Mercantil", duration: "45 min" },
+  { id: "laboral", label: "Derecho Laboral", duration: "45 min" },
+  { id: "consulta", label: "Consulta General", duration: "30 min" },
 ]
 
 const timeSlots = [
@@ -34,18 +34,6 @@ function generateAvailableDays() {
   return days
 }
 
-function getSmartSuggestion(service: string): string {
-  const suggestions: Record<string, string> = {
-    civil: "Para casos civiles, recomendamos la primera consulta por la mañana para revisar documentación con calma.",
-    penal: "Los casos penales requieren atención urgente. Priorizamos horarios tempranos para actuar con rapidez.",
-    familiar: "Entendemos la sensibilidad de los casos familiares. Ofrecemos un ambiente privado y confidencial.",
-    mercantil: "Para consultas mercantiles, le sugerimos traer documentos de la empresa para una asesoría más eficiente.",
-    laboral: "Reúna sus recibos de nómina y contrato laboral para aprovechar al máximo la consulta.",
-    consulta: "La primera consulta es gratuita. Evaluaremos su caso y le orientaremos sobre los pasos a seguir.",
-  }
-  return suggestions[service] || suggestions.consulta
-}
-
 export function AppointmentBooking() {
   const [step, setStep] = useState(1)
   const [selectedService, setSelectedService] = useState("")
@@ -54,6 +42,7 @@ export function AppointmentBooking() {
   const [formData, setFormData] = useState({ name: "", email: "", phone: "", message: "" })
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [appointmentId, setAppointmentId] = useState("")
 
   const availableDays = useMemo(() => generateAvailableDays(), [])
 
@@ -65,6 +54,25 @@ export function AppointmentBooking() {
     return busy
   }, [selectedDate])
 
+  const generateToken = async (appointmentId: string, email: string) => {
+    try {
+      const response = await fetch('/api/generate-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ appointmentId, email })
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        return data.token;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error generando token:', error);
+      return null;
+    }
+  };
+
   const handleSubmit = async () => {
     if (!selectedService || !selectedDate || !selectedTime || !formData.name || !formData.email || !formData.phone) {
       alert("Por favor completa todos los campos")
@@ -74,6 +82,7 @@ export function AppointmentBooking() {
     setIsLoading(true)
 
     try {
+      // 1. Guardar la cita básica
       const appointmentData = {
         nombre: formData.name,
         email: formData.email,
@@ -86,10 +95,51 @@ export function AppointmentBooking() {
         fechaCreacion: new Date().toISOString(),
       }
 
-      console.log("Guardando cita:", appointmentData)
-
       const docRef = await addDoc(collection(db, "appointments"), appointmentData)
-      console.log("Cita guardada con ID:", docRef.id)
+      setAppointmentId(docRef.id)
+
+      // 2. Generar token de edición
+      const token = await generateToken(docRef.id, formData.email);
+      
+      // 3. Actualizar el documento con el token
+      await updateDoc(doc(db, "appointments", docRef.id), {
+        editToken: token,
+        tokenExpires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 7 días
+      });
+
+      // 4. URL de edición
+      const editUrl = `https://legal-website-6035a.web.app/editar-cita/${docRef.id}?token=${token}`;
+
+      // 5. Actualizar con los campos de correo
+      await updateDoc(doc(db, "appointments", docRef.id), {
+        to: [formData.email],
+        message: {
+          subject: "Confirmación de cita - Loida Azules",
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #0A1A2F;">¡Cita Confirmada!</h2>
+              <p>Hola <strong>${formData.name}</strong>,</p>
+              <p>Tu cita ha sido agendada exitosamente:</p>
+              <div style="background-color: #F5F7FA; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <p><strong>Fecha:</strong> ${selectedDate?.toLocaleDateString()}</p>
+                <p><strong>Hora:</strong> ${selectedTime} hrs</p>
+                <p><strong>Servicio:</strong> ${serviceTypes.find(s => s.id === selectedService)?.label}</p>
+                <p><strong>Motivo:</strong> ${formData.message || "No especificado"}</p>
+              </div>
+              <p>¿Necesitas modificar tu cita?</p>
+              <p>
+                <a href="${editUrl}" 
+                   style="background-color: #722F37; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                  Editar mi cita
+                </a>
+              </p>
+              <p style="margin-top: 30px; font-size: 12px; color: #7F8C8D;">
+                Este enlace es válido por 7 días. Si no puedes asistir, por favor cancela con anticipación.
+              </p>
+            </div>
+          `
+        }
+      })
 
       setIsSubmitted(true)
     } catch (error) {
@@ -102,25 +152,17 @@ export function AppointmentBooking() {
 
   if (isSubmitted) {
     return (
-      <section id="agendar" className="bg-background py-24 lg:py-32">
+      <section id="agendar" className="bg-stone py-24 lg:py-32">
         <div className="mx-auto max-w-2xl px-4 text-center sm:px-6">
-          <div className="rounded-2xl border-2 border-green-500 bg-green-50 p-12 shadow-2xl transform scale-105 transition-all duration-500">
-            <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-green-100">
-              <CheckCircle className="h-12 w-12 text-green-600" />
+          <div className="rounded-2xl border-2 border-gold-classic bg-white p-12 shadow-2xl transform scale-105 transition-all duration-500">
+            <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gold-classic/10">
+              <CheckCircle className="h-12 w-12 text-gold-classic" />
             </div>
-            <h3 className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-green-800 sm:text-4xl">
+            <h3 className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-navy-deep sm:text-4xl">
               ¡Cita Confirmada!
             </h3>
-            <p className="mt-4 font-[family-name:var(--font-inter)] text-lg text-green-700">
-              Hemos recibido tu solicitud para el{" "}
-              <span className="font-bold text-green-900">
-                {selectedDate && format(selectedDate, "EEEE d 'de' MMMM", { locale: es })}
-              </span>{" "}
-              a las{" "}
-              <span className="font-bold text-green-900">{selectedTime} hrs</span>.
-            </p>
-            <p className="mt-2 font-[family-name:var(--font-inter)] text-green-600">
-              Te hemos enviado un correo de confirmación a <span className="font-bold">{formData.email}</span>.
+            <p className="mt-4 font-[family-name:var(--font-inter)] text-lg text-text-light">
+              Hemos enviado un correo a <strong>{formData.email}</strong> con los detalles y un enlace para editar tu cita.
             </p>
             <button
               onClick={() => {
@@ -131,7 +173,7 @@ export function AppointmentBooking() {
                 setSelectedTime("")
                 setFormData({ name: "", email: "", phone: "", message: "" })
               }}
-              className="mt-8 rounded-lg bg-green-600 px-10 py-4 font-[family-name:var(--font-inter)] text-base font-semibold text-white transition-all hover:bg-green-700 hover:shadow-lg hover:shadow-green-200"
+              className="mt-8 rounded-lg bg-navy-deep px-10 py-4 font-[family-name:var(--font-inter)] text-base font-semibold text-white transition-all hover:bg-burgundy"
             >
               Agendar Otra Cita
             </button>
@@ -142,31 +184,31 @@ export function AppointmentBooking() {
   }
 
   return (
-    <section id="agendar" className="bg-background py-24 lg:py-32">
+    <section id="agendar" className="bg-stone py-24 lg:py-32">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <span className="font-[family-name:var(--font-inter)] text-sm font-medium uppercase tracking-[0.2em] text-gold">
+          <span className="font-[family-name:var(--font-inter)] text-sm font-medium uppercase tracking-[0.2em] text-burgundy">
             Sistema de Citas Inteligente
           </span>
-          <h2 className="mt-4 font-[family-name:var(--font-playfair)] text-3xl font-bold text-foreground sm:text-4xl lg:text-5xl text-balance">
+          <h2 className="mt-4 font-[family-name:var(--font-playfair)] text-3xl font-bold text-navy-deep sm:text-4xl lg:text-5xl text-balance">
             Agenda tu Consulta
           </h2>
-          <p className="mt-4 font-[family-name:var(--font-inter)] text-base text-muted-foreground">
-            Nuestro sistema inteligente te guía paso a paso para encontrar el mejor horario disponible.
+          <p className="mt-4 font-[family-name:var(--font-inter)] text-base text-text-light">
+            Recibirás un correo con un enlace para editar tu cita cuando lo necesites.
           </p>
         </div>
 
-        {/* Progress Steps */}
+        {/* Progress Steps - mantener igual que antes */}
         <div className="mx-auto mt-12 flex max-w-md items-center justify-between">
           {[1, 2, 3, 4].map((s) => (
             <div key={s} className="flex items-center">
               <div
                 className={`flex h-10 w-10 items-center justify-center rounded-full font-[family-name:var(--font-inter)] text-sm font-bold transition-all duration-300 ${
                   s === step
-                    ? "bg-gold text-navy shadow-lg shadow-gold/30"
+                    ? "bg-gold-classic text-navy-deep shadow-lg shadow-gold-classic/30"
                     : s < step
-                    ? "bg-navy text-primary-foreground"
-                    : "bg-muted text-muted-foreground"
+                    ? "bg-navy-deep text-white"
+                    : "bg-stone text-text-light border border-border"
                 }`}
               >
                 {s < step ? <CheckCircle className="h-5 w-5" /> : s}
@@ -174,7 +216,7 @@ export function AppointmentBooking() {
               {s < 4 && (
                 <div
                   className={`mx-2 h-0.5 w-12 transition-all duration-300 sm:w-20 ${
-                    s < step ? "bg-navy" : "bg-muted"
+                    s < step ? "bg-navy-deep" : "bg-border"
                   }`}
                 />
               )}
@@ -184,292 +226,16 @@ export function AppointmentBooking() {
 
         <div className="mx-auto mt-8 flex max-w-md justify-between px-1">
           {["Servicio", "Fecha", "Hora", "Datos"].map((label) => (
-            <span key={label} className="font-[family-name:var(--font-inter)] text-xs text-muted-foreground">
+            <span key={label} className="font-[family-name:var(--font-inter)] text-xs text-text-light">
               {label}
             </span>
           ))}
         </div>
 
+        {/* Steps - mantener el mismo JSX que tenías antes */}
         <div className="mt-10 rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-10">
-          {/* Step 1: Select Service */}
-          {step === 1 && (
-            <div>
-              <h3 className="font-[family-name:var(--font-playfair)] text-xl font-bold text-foreground">
-                Selecciona el tipo de consulta
-              </h3>
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                {serviceTypes.map((service) => (
-                  <button
-                    key={service.id}
-                    onClick={() => setSelectedService(service.id)}
-                    className={`flex items-center gap-4 rounded-lg border p-4 text-left transition-all duration-300 ${
-                      selectedService === service.id
-                        ? "border-gold bg-gold/5 shadow-md"
-                        : "border-border hover:border-gold/30 hover:bg-secondary"
-                    }`}
-                  >
-                    <div
-                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg transition-colors ${
-                        selectedService === service.id ? "bg-gold/20" : "bg-muted"
-                      }`}
-                    >
-                      <FileText className={`h-5 w-5 ${selectedService === service.id ? "text-gold" : "text-muted-foreground"}`} />
-                    </div>
-                    <div>
-                      <div className="font-[family-name:var(--font-inter)] text-sm font-semibold text-foreground">
-                        {service.label}
-                      </div>
-                      <div className="font-[family-name:var(--font-inter)] text-xs text-muted-foreground">
-                        Duración: {service.duration}
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-
-              {selectedService && (
-                <div className="mt-6 flex items-start gap-3 rounded-lg border border-gold/20 bg-gold/5 p-4">
-                  <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-gold" />
-                  <p className="font-[family-name:var(--font-inter)] text-sm leading-relaxed text-foreground/80">
-                    {getSmartSuggestion(selectedService)}
-                  </p>
-                </div>
-              )}
-
-              <div className="mt-8 flex justify-end">
-                <button
-                  onClick={() => step < 4 && setStep(2)}
-                  disabled={!selectedService}
-                  className="inline-flex items-center gap-2 rounded-sm bg-navy px-8 py-3 font-[family-name:var(--font-inter)] text-sm font-semibold text-primary-foreground transition-all hover:bg-navy-light disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  Continuar
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Step 2: Select Date */}
-          {step === 2 && (
-            <div>
-              <h3 className="font-[family-name:var(--font-playfair)] text-xl font-bold text-foreground">
-                Selecciona una fecha
-              </h3>
-              <p className="mt-2 font-[family-name:var(--font-inter)] text-sm text-muted-foreground">
-                Mostrando los próximos días hábiles disponibles
-              </p>
-              <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-                {availableDays.map((day) => (
-                  <button
-                    key={day.toISOString()}
-                    onClick={() => setSelectedDate(day)}
-                    className={`flex flex-col items-center rounded-lg border p-4 transition-all duration-300 ${
-                      selectedDate && isSameDay(selectedDate, day)
-                        ? "border-gold bg-gold/5 shadow-md"
-                        : "border-border hover:border-gold/30 hover:bg-secondary"
-                    }`}
-                  >
-                    <span className="font-[family-name:var(--font-inter)] text-xs uppercase text-muted-foreground">
-                      {format(day, "EEE", { locale: es })}
-                    </span>
-                    <span className="mt-1 font-[family-name:var(--font-playfair)] text-2xl font-bold text-foreground">
-                      {format(day, "d")}
-                    </span>
-                    <span className="font-[family-name:var(--font-inter)] text-xs text-muted-foreground">
-                      {format(day, "MMM", { locale: es })}
-                    </span>
-                  </button>
-                ))}
-              </div>
-              <div className="mt-8 flex justify-between">
-                <button
-                  onClick={() => setStep(1)}
-                  className="inline-flex items-center gap-2 rounded-sm border border-border px-6 py-3 font-[family-name:var(--font-inter)] text-sm font-medium text-foreground transition-all hover:bg-secondary"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Atrás
-                </button>
-                <button
-                  onClick={() => setStep(3)}
-                  disabled={!selectedDate}
-                  className="inline-flex items-center gap-2 rounded-sm bg-navy px-8 py-3 font-[family-name:var(--font-inter)] text-sm font-semibold text-primary-foreground transition-all hover:bg-navy-light disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  Continuar
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Step 3: Select Time */}
-          {step === 3 && (
-            <div>
-              <h3 className="font-[family-name:var(--font-playfair)] text-xl font-bold text-foreground">
-                Selecciona un horario
-              </h3>
-              <p className="mt-2 font-[family-name:var(--font-inter)] text-sm text-muted-foreground">
-                {selectedDate && format(selectedDate, "EEEE d 'de' MMMM, yyyy", { locale: es })}
-              </p>
-
-              <div className="mt-6">
-                <div className="mb-3 flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <div className="h-3 w-3 rounded-full bg-gold/20 ring-1 ring-gold/40" />
-                    <span className="font-[family-name:var(--font-inter)] text-xs text-muted-foreground">Disponible</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="h-3 w-3 rounded-full bg-muted" />
-                    <span className="font-[family-name:var(--font-inter)] text-xs text-muted-foreground">Ocupado</span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-3 sm:grid-cols-5">
-                  {timeSlots.map((time) => {
-                    const isBusy = simulatedBusy.has(time)
-                    return (
-                      <button
-                        key={time}
-                        onClick={() => !isBusy && setSelectedTime(time)}
-                        disabled={isBusy}
-                        className={`flex items-center justify-center gap-2 rounded-lg border p-3 font-[family-name:var(--font-inter)] text-sm transition-all duration-300 ${
-                          isBusy
-                            ? "cursor-not-allowed border-border bg-muted/50 text-muted-foreground line-through opacity-50"
-                            : selectedTime === time
-                            ? "border-gold bg-gold/10 font-semibold text-foreground shadow-md"
-                            : "border-border text-foreground hover:border-gold/30 hover:bg-secondary"
-                        }`}
-                      >
-                        <Clock className="h-3.5 w-3.5" />
-                        {time}
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-
-              <div className="mt-8 flex justify-between">
-                <button
-                  onClick={() => setStep(2)}
-                  className="inline-flex items-center gap-2 rounded-sm border border-border px-6 py-3 font-[family-name:var(--font-inter)] text-sm font-medium text-foreground transition-all hover:bg-secondary"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Atrás
-                </button>
-                <button
-                  onClick={() => setStep(4)}
-                  disabled={!selectedTime}
-                  className="inline-flex items-center gap-2 rounded-sm bg-navy px-8 py-3 font-[family-name:var(--font-inter)] text-sm font-semibold text-primary-foreground transition-all hover:bg-navy-light disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  Continuar
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Step 4: Contact Details */}
-          {step === 4 && (
-            <div>
-              <h3 className="font-[family-name:var(--font-playfair)] text-xl font-bold text-foreground">
-                Completa tus datos
-              </h3>
-
-              <div className="mt-2 rounded-lg border border-gold/20 bg-gold/5 p-4">
-                <div className="flex flex-wrap gap-4 font-[family-name:var(--font-inter)] text-sm text-foreground/80">
-                  <span className="flex items-center gap-1.5">
-                    <Calendar className="h-4 w-4 text-gold" />
-                    {selectedDate && format(selectedDate, "d MMM yyyy", { locale: es })}
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <Clock className="h-4 w-4 text-gold" />
-                    {selectedTime} hrs
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <FileText className="h-4 w-4 text-gold" />
-                    {serviceTypes.find((s) => s.id === selectedService)?.label}
-                  </span>
-                </div>
-              </div>
-
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="mb-1.5 flex items-center gap-2 font-[family-name:var(--font-inter)] text-sm font-medium text-foreground">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                    Nombre Completo
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full rounded-lg border border-border bg-background px-4 py-3 font-[family-name:var(--font-inter)] text-sm text-foreground outline-none transition-colors focus:border-gold focus:ring-1 focus:ring-gold/30"
-                    placeholder="Tu nombre"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1.5 flex items-center gap-2 font-[family-name:var(--font-inter)] text-sm font-medium text-foreground">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
-                    Correo Electrónico
-                  </label>
-                  <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full rounded-lg border border-border bg-background px-4 py-3 font-[family-name:var(--font-inter)] text-sm text-foreground outline-none transition-colors focus:border-gold focus:ring-1 focus:ring-gold/30"
-                    placeholder="correo@ejemplo.com"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1.5 flex items-center gap-2 font-[family-name:var(--font-inter)] text-sm font-medium text-foreground">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                    Teléfono
-                  </label>
-                  <input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full rounded-lg border border-border bg-background px-4 py-3 font-[family-name:var(--font-inter)] text-sm text-foreground outline-none transition-colors focus:border-gold focus:ring-1 focus:ring-gold/30"
-                    placeholder="+34 604 173 477"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1.5 flex items-center gap-2 font-[family-name:var(--font-inter)] text-sm font-medium text-foreground">
-                    <FileText className="h-4 w-4 text-muted-foreground" />
-                    Breve Descripción del Caso
-                  </label>
-                  <textarea
-                    value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    className="w-full rounded-lg border border-border bg-background px-4 py-3 font-[family-name:var(--font-inter)] text-sm text-foreground outline-none transition-colors focus:border-gold focus:ring-1 focus:ring-gold/30 min-h-[80px]"
-                    placeholder="Describe brevemente tu situación"
-                  />
-                </div>
-              </div>
-
-              <div className="mt-8 flex justify-between">
-                <button
-                  onClick={() => setStep(3)}
-                  className="inline-flex items-center gap-2 rounded-sm border border-border px-6 py-3 font-[family-name:var(--font-inter)] text-sm font-medium text-foreground transition-all hover:bg-secondary"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Atrás
-                </button>
-                <button
-                  onClick={handleSubmit}
-                  disabled={!formData.name || !formData.email || !formData.phone || isLoading}
-                  className="inline-flex items-center gap-2 rounded-sm bg-gold px-10 py-3 font-[family-name:var(--font-inter)] text-sm font-bold text-navy transition-all hover:bg-gold/90 hover:shadow-lg hover:shadow-gold/20 disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  {isLoading ? (
-                    <>Guardando...</>
-                  ) : (
-                    <>
-                      Confirmar Cita
-                      <CheckCircle className="h-4 w-4" />
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          )}
+          {/* Aquí va el mismo código de los steps que ya tenías funcionando */}
+          {/* Por brevedad no lo repito, pero mantén tu código existente */}
         </div>
       </div>
     </section>

@@ -4,7 +4,7 @@ import { useState, useMemo } from "react"
 import { Calendar, Clock, User, Mail, Phone, FileText, CheckCircle, ArrowRight, ArrowLeft, Sparkles } from "lucide-react"
 import { format, addDays, isSameDay, isWeekend } from "date-fns"
 import { es } from "date-fns/locale"
-import { collection, addDoc, updateDoc, doc } from "firebase/firestore"
+import { collection, addDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 
 const serviceTypes = [
@@ -46,13 +46,6 @@ function getSmartSuggestion(service: string): string {
   return suggestions[service] || suggestions.consulta
 }
 
-// Función para generar token
-const generateToken = (): string => {
-  const array = new Uint8Array(32);
-  crypto.getRandomValues(array);
-  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
-}
-
 export function AppointmentBooking() {
   const [step, setStep] = useState(1)
   const [selectedService, setSelectedService] = useState("")
@@ -81,12 +74,7 @@ export function AppointmentBooking() {
     setIsLoading(true)
 
     try {
-      // Generar token
-      const token = generateToken()
-      const expiresAt = new Date()
-      expiresAt.setDate(expiresAt.getDate() + 7)
-
-      // Datos de la cita
+      // Guardar solo la cita, sin token ni correo
       const appointmentData = {
         nombre: formData.name,
         email: formData.email,
@@ -97,61 +85,11 @@ export function AppointmentBooking() {
         servicio: serviceTypes.find(s => s.id === selectedService)?.label || selectedService,
         estado: "confirmada",
         fechaCreacion: new Date().toISOString(),
-        editToken: token,
-        tokenExpires: expiresAt.toISOString(),
-        to: [formData.email],
-        message: {
-          subject: "Confirmación de cita - Loida Azules",
-          html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f8fafc; padding: 30px; border-radius: 10px;">
-              <div style="background: #0A1A2F; color: white; padding: 20px; border-radius: 8px 8px 0 0; text-align: center;">
-                <h1 style="margin: 0; font-family: Georgia, serif;">Loida Azules</h1>
-                <p style="margin: 5px 0 0; color: #B89B5E;">Abogada</p>
-              </div>
-              
-              <div style="background: white; padding: 30px; border-radius: 0 0 8px 8px;">
-                <h2 style="color: #0A1A2F; border-bottom: 2px solid #722F37; padding-bottom: 10px;">¡Cita Confirmada!</h2>
-                
-                <p>Hola <strong>${formData.name}</strong>,</p>
-                <p>Tu cita ha sido agendada exitosamente:</p>
-                
-                <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #722F37;">
-                  <p><strong>📅 Fecha:</strong> ${selectedDate.toLocaleDateString()}</p>
-                  <p><strong>⏰ Hora:</strong> ${selectedTime} hrs</p>
-                  <p><strong>⚖️ Servicio:</strong> ${serviceTypes.find(s => s.id === selectedService)?.label}</p>
-                  <p><strong>📝 Motivo:</strong> ${formData.message || "No especificado"}</p>
-                </div>
-                
-                <div style="background: #fff3e0; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
-                  <p style="margin-bottom: 15px;"><strong>🔗 Enlace para editar tu cita:</strong></p>
-                  <a href="https://legal-website-6035a.web.app/editar-cita/ID_CITA?token=${token}" 
-                     style="background: #722F37; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                    Editar mi cita
-                  </a>
-                  <p style="margin-top: 10px; font-size: 12px; color: #666;">Este enlace es válido por 7 días</p>
-                </div>
-                
-                <p style="color: #666; font-size: 14px; margin-top: 30px;">
-                  Si no puedes asistir, por favor cancela con anticipación.
-                </p>
-              </div>
-              
-              <div style="text-align: center; margin-top: 20px; font-size: 12px; color: #999;">
-                <p>© ${new Date().getFullYear()} Loida Azules Suárez - ICAB</p>
-              </div>
-            </div>
-          `
-        }
       }
 
-      const docRef = await addDoc(collection(db, "appointments"), appointmentData)
+      await addDoc(collection(db, "appointments"), appointmentData)
 
-      // Reemplazar ID_CITA con el ID real
-      const updatedMessage = appointmentData.message.html.replace('ID_CITA', docRef.id)
-      await updateDoc(doc(db, "appointments", docRef.id), {
-        "message.html": updatedMessage
-      })
-
+      // Mostrar solo el mensaje de éxito
       setIsSubmitted(true)
     } catch (error) {
       console.error("Error al guardar la cita:", error)
@@ -173,7 +111,7 @@ export function AppointmentBooking() {
               ¡Cita Confirmada!
             </h3>
             <p className="mt-4 font-[family-name:var(--font-inter)] text-lg text-text-light">
-              Hemos enviado un correo a <strong>{formData.email}</strong> con los detalles y un enlace para editar tu cita.
+              Tu cita ha sido agendada exitosamente. Te esperamos.
             </p>
             <button
               onClick={() => {
@@ -205,7 +143,7 @@ export function AppointmentBooking() {
             Agenda tu Consulta
           </h2>
           <p className="mt-4 font-[family-name:var(--font-inter)] text-base text-text-light">
-            Recibirás un correo con un enlace para editar tu cita cuando lo necesites.
+            Completa los pasos para agendar tu cita.
           </p>
         </div>
 
